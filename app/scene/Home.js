@@ -1,12 +1,18 @@
 import React, {Component} from 'react';
 import Super from "./../super"
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import { DeviceEventEmitter,StyleSheet,ToastAndroid ,Text, View, } from 'react-native';
+import { DeviceEventEmitter,StyleSheet,ToastAndroid ,Text, View,ScrollView } from 'react-native';
 import { Accordion, List } from 'antd-mobile-rn';
+import * as Animatable from 'react-native-animatable';
 
 export default class Home extends Component {
+    static navigationOptions = {
+        title: 'Home',
+        /* No more header config here! */
+      };
     state={
         data:[],
+        activeSections:""
     }
     componentWillMount() {
         this.gettokenName()
@@ -25,17 +31,26 @@ export default class Home extends Component {
             })
         })
     }
-    renderItem=(item)=>{
-        return <List>
-                    {item.map((it)=>{
-                        return <List.Item key={it.id}  onPress={()=>this.handleSubmit(it.id)} style={{marginLeft:0,paddingLeft:20}}>
-                                    <Text>{it.title}</Text>
-                                    <FontAwesome name={'angle-right'} style={{position: "absolute",right:15,fontSize: 16}}  />
-                                </List.Item>
-                    })}
-                </List>
+    onChange = activeSections => {
+        this.setState({ activeSections });
+      };
+    renderItem=(item,isActive)=>{
+        return <Animatable.View
+                    duration={300}
+                    easing="ease-out"
+                    animation={isActive ? 'zoomIn' : false}
+                    >
+                    <List style={styles.list}>
+                        {item.map((it)=>{
+                            return  <List.Item key={it.id}  onPressIn={()=>this.toList(it.id)}>
+                                            <Text style={{paddingLeft:20}}>{it.title}</Text>
+                                            <FontAwesome name={'angle-right'} style={{position: "absolute",right:15,fontSize: 16}}  />
+                                    </List.Item>
+                        })}
+                    </List>
+                </Animatable.View>
     }
-    handleSubmit=(menuId)=>{
+    toList=(menuId)=>{
         const {tokenName}=this.state
         this.props.navigation.navigate('ItemList',{
             menuId,
@@ -43,22 +58,33 @@ export default class Home extends Component {
           })
     }
     render(){
-        const {data}=this.state
-        console.log(data)
+        const {data,activeSections}=this.state
         return (
-            <View>
-                <Accordion>
+            <ScrollView>
+                <Accordion
+                    onChange={this.onChange}
+                    activeSections={this.state.activeSections}
+                >
                     {
                         data?data.map((item)=>{
-                            return <Accordion.Panel header={item.title} key={item.id}>
+                            const id=item.id
+                            return <Accordion.Panel header={item.title} key={id} style={styles.Panel}>
                                         {
-                                          item.level2s?this.renderItem(item.level2s):""
+                                          item.level2s?this.renderItem(item.level2s,activeSections===id.toString()?true:false):""
                                         }
                                     </Accordion.Panel>
                         }):""
                     }
                 </Accordion>
-            </View>
+            </ScrollView>
         )
     }
 }
+const styles = StyleSheet.create({
+    Panel:{
+        height:60,
+    },
+    list:{
+        marginLeft:10,
+    }
+})

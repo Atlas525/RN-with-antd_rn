@@ -3,7 +3,7 @@ import Login from './app/scene/Login'
 import Home from './app/scene/Home'
 import User from './app/scene/User'
 import Ionicons from 'react-native-vector-icons/Ionicons';
-// import ItemList from './app/scene/ItemList'
+import ItemList from './app/scene/ItemList'
 import {createStackNavigator, createAppContainer,createBottomTabNavigator } from 'react-navigation';
 
 const TabNavigator = createBottomTabNavigator({
@@ -34,11 +34,10 @@ const TabNav=createAppContainer(TabNavigator);
 const AppNavigator = createStackNavigator({
   Login: Login,
   TabNav: TabNav,
-  // ItemList:ItemList,
+  ItemList:ItemList,
 }, {
     initialRouteName: 'Login',
     mode: 'modal',
-    headerMode: 'none',
 });
 const AppContainer =createAppContainer(AppNavigator);
 
