@@ -7,9 +7,15 @@ import * as Animatable from 'react-native-animatable';
 
 export default class Home extends Component {
     static navigationOptions = {
-        title: 'Home',
-        /* No more header config here! */
-      };
+        title: '首页',
+        headerStyle: {
+          backgroundColor: '#148EE9',
+        },
+        headerTintColor: '#fff',
+        headerTitleStyle: {
+          fontWeight: 'bold',
+        },
+    };
     state={
         data:[],
         activeSections:""
@@ -36,13 +42,13 @@ export default class Home extends Component {
       };
     renderItem=(item,isActive)=>{
         return <Animatable.View
-                    duration={300}
+                    duration={500}
                     easing="ease-out"
-                    animation={isActive ? 'zoomIn' : false}
+                    animation={isActive ? 'fadeInDown' : null}
                     >
                     <List style={styles.list}>
                         {item.map((it)=>{
-                            return  <List.Item key={it.id}  onPressIn={()=>this.toList(it.id)}>
+                            return  <List.Item key={it.id}  onPressIn={()=>this.toList(it.id,it.title)}>
                                             <Text style={{paddingLeft:20}}>{it.title}</Text>
                                             <FontAwesome name={'angle-right'} style={{position: "absolute",right:15,fontSize: 16}}  />
                                     </List.Item>
@@ -50,11 +56,12 @@ export default class Home extends Component {
                     </List>
                 </Animatable.View>
     }
-    toList=(menuId)=>{
+    toList=(menuId,title)=>{
         const {tokenName}=this.state
         this.props.navigation.navigate('ItemList',{
             menuId,
-            tokenName
+            tokenName,
+            title
           })
     }
     render(){
@@ -63,18 +70,13 @@ export default class Home extends Component {
             <ScrollView>
                 <Accordion
                     onChange={this.onChange}
-                    activeSections={this.state.activeSections}
-                >
-                    {
-                        data?data.map((item)=>{
-                            const id=item.id
-                            return <Accordion.Panel header={item.title} key={id} style={styles.Panel}>
-                                        {
-                                          item.level2s?this.renderItem(item.level2s,activeSections===id.toString()?true:false):""
-                                        }
-                                    </Accordion.Panel>
-                        }):""
-                    }
+                    activeSections={this.state.activeSections}>
+                    {data?data.map((item)=>{
+                        const id=item.id
+                        return <Accordion.Panel header={item.title} key={id} style={styles.Panel}>
+                                    {item.level2s?this.renderItem(item.level2s,activeSections===id.toString()?true:false):"" }
+                                </Accordion.Panel>
+                        }):""}
                 </Accordion>
             </ScrollView>
         )

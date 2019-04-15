@@ -6,9 +6,25 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import ItemList from './app/scene/ItemList'
 import {createStackNavigator, createAppContainer,createBottomTabNavigator } from 'react-navigation';
 
+const HomeStack = createStackNavigator({
+  Home: { screen: Home },
+  ItemList: { screen: ItemList },
+});
+HomeStack.navigationOptions = ({ navigation }) => {
+  let tabBarVisible = true;
+  if (navigation.state.index > 0) {
+    tabBarVisible = false;
+  }
+  return {
+    tabBarVisible,
+  };
+};
+const UserStack = createStackNavigator({
+  User: { screen: User },
+});
 const TabNavigator = createBottomTabNavigator({
-  Home: Home,
-  User: User,
+  Home: HomeStack,
+  User: UserStack,
 },
 {
   defaultNavigationOptions: ({ navigation }) => ({
@@ -24,7 +40,7 @@ const TabNavigator = createBottomTabNavigator({
     },
   }),
   tabBarOptions: {
-    activeTintColor: '#4050B5',
+    activeTintColor: '#148EE9',
     inactiveTintColor: 'gray',
   },
 }
@@ -34,10 +50,10 @@ const TabNav=createAppContainer(TabNavigator);
 const AppNavigator = createStackNavigator({
   Login: Login,
   TabNav: TabNav,
-  ItemList:ItemList,
 }, {
     initialRouteName: 'Login',
     mode: 'modal',
+    headerMode: 'none',
 });
 const AppContainer =createAppContainer(AppNavigator);
 
