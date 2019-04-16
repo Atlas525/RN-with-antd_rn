@@ -49,8 +49,8 @@ export default class Home extends Component {
                     <List style={styles.list}>
                         {item.map((it)=>{
                             return  <List.Item key={it.id}  onPressIn={()=>this.toList(it.id,it.title)}>
-                                            <Text style={{paddingLeft:20}}>{it.title}</Text>
-                                            <FontAwesome name={'angle-right'} style={{position: "absolute",right:15,fontSize: 16}}  />
+                                            <Text style={styles.listText}>{it.title}</Text>
+                                            <FontAwesome name={'angle-right'} style={styles.FontAwesome}  />
                                     </List.Item>
                         })}
                     </List>
@@ -88,5 +88,15 @@ const styles = StyleSheet.create({
     },
     list:{
         marginLeft:10,
+    },
+    FontAwesome:{
+        position: "absolute",
+        right:15,
+        fontSize: 16
+    },
+    listText:{
+        paddingLeft:20,
+        fontSize:18
     }
+
 })

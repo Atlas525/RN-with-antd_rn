@@ -1,11 +1,14 @@
 import React, {Component} from 'react';
 import Super from "./../super"
-import { DeviceEventEmitter,StyleSheet,ToastAndroid ,Text, View,ScrollView } from 'react-native';
-import { SwipeAction,List,Button } from 'antd-mobile-rn'
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { Text,ScrollView,RefreshControl,StyleSheet,View } from 'react-native';
+import { SwipeAction,List,Button,ActivityIndicator,Toast } from 'antd-mobile-rn'
+import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
+import Popover,{ Rect } from 'react-native-popover-view'
 
+const rect=new Rect(290, 0, 220, 40)
 export default class User extends Component {
     static navigationOptions = ({ navigation }) => {
+        const {state, setParams} = navigation;
         return {
                 title: navigation.getParam('title', 'A Nested Details Screen'),
                 headerStyle: {
@@ -16,16 +19,28 @@ export default class User extends Component {
                     fontWeight: 'bold',
                 },
                 headerRight: (
-                    <FontAwesome name={'navicon'} size={25} style={{color:'#fff',marginRight:10}}/>
+                    <View>
+                        <SimpleLineIcons 
+                            ref={ref => this.touchable = ref}
+                            name={'options'} 
+                            size={20} 
+                            style={styles.headerRight}  
+                            onPress={(navigation.getParam('showPopover'))}/>
+                    </View>
                   ),
             }
       };
     state = {
-		showDrawer: false,
-		searchList: [],
-		optArr: [],
+        visible: false,
+        spinnerRect: {},
+        searchList: [],
+        optArr: [],
         animating: false,
         active:false,
+        refreshing: false,
+    }
+    componentDidMount(){
+        this.props.navigation.setParams({ showPopover: this.showPopover });
     }
     componentWillMount() {
         const { navigation } = this.props;
@@ -45,31 +60,116 @@ export default class User extends Component {
                     pageInfo: res.pageInfo,
                     showDrawer: false,
                     menuId,
-                    tokenName
+                    tokenName,
+                    refreshing: false,
                 })
             }
         })
-} 
+    } 
+    goPage = (no) => {
+        const {pageInfo,menuId,searchwords,tokenName} = this.state
+		let data = {}
+		const topageNo = pageInfo.pageNo + no
+		data["pageNo"] = topageNo
+		data["pageSize"] = pageInfo.pageSize
+		for(let k in searchwords) {
+			if(searchwords[k]) {
+				data[k] = searchwords[k]
+			}
+        }
+        this.setState({
+            list:[],
+            pageInfo:''
+        });
+        this.requestList(menuId,tokenName, data)
+    }
+    _onRefresh = () => {
+        const {menuId,tokenName} = this.state
+        this.setState({
+            refreshing: true,
+            list:[],
+            pageInfo:''
+        });
+        this.requestList(menuId,tokenName)
+      }
+    //显示下拉列表
+    showPopover=()=> {
+        this.setState({
+            visible: true,
+        });
+    }
+    closePopover=()=> {
+        this.setState({
+            visible: false
+        });
+    }
+    popoverNav=(key)=>{
+        alert(key)
+    }
+    handelDelete = (code) => {
+        const {menuId,tokenName} = this.state
+		Super.super({
+			url: `/api/entity/curd/remove/${menuId}`,
+			data: {
+				codes: code
+			}
+		},tokenName).then((res) => {
+			if(res.status === "suc") {
+				Toast.success("删除成功！") //刷新列表 
+				this.requestList(menuId,tokenName)
+			} else {
+				Toast.fail('删除失败！')
+			}
+		})
+	}
     render(){
         const { navigation } = this.props;
-        const {list,showDrawer,searchList,optArr,pageInfo,tokenName} = this.state
+        const {list,visible,searchList,optArr,pageInfo,spinnerRect} = this.state
         const totalPage = pageInfo ? Math.ceil(pageInfo.count / pageInfo.pageSize) : "";
-        const right = [
-            {
-              text: 'Delete',
-              onPress: () => console.log('delete'),
-              style: { backgroundColor: 'red', color: 'white' },
-            },
-          ];
+          
         return (
-            <ScrollView>
+            <ScrollView 
+                refreshControl={
+                    <RefreshControl
+                        refreshing={this.state.refreshing}
+                        onRefresh={this._onRefresh}
+                        />
+                }
+            >
+            <Popover
+                fromRect={rect}
+                fromView={this.touchable}
+                onClose={this.closePopover}
+                placement={'bottom'}
+                popoverStyle={{width:100}}
+                isVisible={visible}>
+                <View>
+                    <Text key={1} style={styles.Text} onPress={()=>this.popoverNav('1')}>
+                        <SimpleLineIcons name={"magnifier"} size={16}/>&nbsp;&nbsp;筛选
+                    </Text>
+                    <Text key={2} style={styles.Text}>
+                        <SimpleLineIcons name={"plus"} size={16}/>&nbsp;&nbsp;创建
+                    </Text>
+                    <Text key={3} style={styles.Text}>
+                        <SimpleLineIcons name={"home"} size={16}/>&nbsp;&nbsp;首页
+                    </Text>
+                    <Text key={4} style={styles.Text}>
+                        <SimpleLineIcons name={"logout"} size={16}/>&nbsp;&nbsp;退出
+                    </Text>                    
+                    <Text key={5} style={styles.Text}>
+                        <SimpleLineIcons name={"user"} size={16}/>&nbsp;&nbsp;用户
+                    </Text>
+                </View>
+            </Popover>
                 {list?list.map((item,index)=>{
                     return <SwipeAction
                                 autoClose
                                 style={{ backgroundColor: 'transparent' }}
-                                right={right}
-                                onOpen={() => console.log('open')}
-                                onClose={() => console.log('close')} 
+                                right={[{
+                                    text: '删除',
+                                    onPress: () =>this.handelDelete(item.code),
+                                    style: { backgroundColor: '#EE6363', color: 'white' },
+                                    },]}
                                 key={item.code}
                                 >
                                 <List 
@@ -77,12 +177,29 @@ export default class User extends Component {
                                     key={item.code}
                                     >
                                     {item.fields?item.fields.map((it)=>{
-                                        return <List.Item extra={it.value} key={it.id}>{it.title}</List.Item>
-                                    }):null}
+                                        return <List.Item extra={it.value} key={it.id} style={{backgroundColor:'#ddd'}}>{it.title}</List.Item>
+                                    }):<ActivityIndicator text="加载中..."/>}
                                 </List>
                             </SwipeAction>
-                    }):null}
+                }):null}
+                {pageInfo ? <Button>
+                                {totalPage>=(pageInfo.pageNo+1)?<Text onPress={()=>this.goPage(+1)}>--点击加载下一页--</Text>:
+                                <Text>没有更多了···</Text>}
+                            </Button>: <ActivityIndicator style={{marginTop:24}} text="加载中..."/>} 
             </ScrollView>
         )
     }
 }
+const styles = StyleSheet.create({
+    Text:{
+        paddingLeft:0,
+        textAlign: 'center',
+        lineHeight:40,
+        fontSize: 18
+    },
+    headerRight:{
+        color:'#fff',
+        marginRight:18
+    },
+
+})
