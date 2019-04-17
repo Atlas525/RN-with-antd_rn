@@ -9,11 +9,13 @@ export default class Home extends Component {
     static navigationOptions = {
         title: '首页',
         headerStyle: {
-          backgroundColor: '#148EE9',
+          backgroundColor: '#2567EF',
         },
         headerTintColor: '#fff',
         headerTitleStyle: {
           fontWeight: 'bold',
+          flex:1, 
+          textAlign: 'center'
         },
     };
     state={

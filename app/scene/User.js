@@ -5,7 +5,7 @@ export default class User extends Component {
     static navigationOptions = {
         title: '用户页',
         headerStyle: {
-          backgroundColor: '#148EE9',
+          backgroundColor: '#2567EF',
         },
         headerTintColor: '#fff',
         headerTitleStyle: {

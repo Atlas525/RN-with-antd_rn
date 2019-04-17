@@ -8,7 +8,6 @@ import {createStackNavigator, createAppContainer,createBottomTabNavigator } from
 
 const HomeStack = createStackNavigator({
   Home: { screen: Home },
-  ItemList: { screen: ItemList },
 });
 HomeStack.navigationOptions = ({ navigation }) => {
   let tabBarVisible = true;
@@ -40,16 +39,20 @@ const TabNavigator = createBottomTabNavigator({
     },
   }),
   tabBarOptions: {
-    activeTintColor: '#148EE9',
+    activeTintColor: '#2567EF',
     inactiveTintColor: 'gray',
   },
 }
 );  
 const TabNav=createAppContainer(TabNavigator);
 
+const ItemStack = createStackNavigator({
+  ItemList: { screen: ItemList },
+});
 const AppNavigator = createStackNavigator({
   Login: Login,
   TabNav: TabNav,
+  ItemList: ItemStack 
 }, {
     initialRouteName: 'Login',
     mode: 'modal',

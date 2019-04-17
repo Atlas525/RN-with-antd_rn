@@ -100,7 +100,8 @@ const styles = StyleSheet.create({
     container:{
         flex: 1,
         justifyContent: 'center',
-        padding:20
+        paddingHorizontal:25,
+        paddingBottom:90, //为了使登录框向上偏移一点
     },
     H1:{
         textAlign:'center',
@@ -108,7 +109,8 @@ const styles = StyleSheet.create({
         marginBottom: 30
     },
     btn:{
-        marginTop:30
+        marginTop:30,
+        backgroundColor: '#2567EF'
     },
     inputs:{
         marginLeft:0,
