@@ -10,8 +10,6 @@ export default class User extends Component {
         headerTintColor: '#fff',
         headerTitleStyle: {
           fontWeight: 'bold',
-          flex:1, 
-          textAlign: 'center'
         },
     };
     render(){

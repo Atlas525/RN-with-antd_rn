@@ -194,8 +194,6 @@ export default class DrawerBox extends Component {
                 headerTintColor: '#fff',
                 headerTitleStyle: {
                     fontWeight: 'bold',
-                    flex:1, 
-                    textAlign: 'center',
                 },
                 headerLeft: (
                     <View>

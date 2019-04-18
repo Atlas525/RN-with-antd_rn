@@ -1,14 +1,14 @@
 import React, {Component} from 'react'
-import { DatePicker, List, InputItem, } from 'antd-mobile-rn';
+import { DatePicker, List, InputItem,Picker } from 'antd-mobile-rn';
 // import ImgBox from './../ImgBox'
 // import SelectPicker from './../SelectPicker'
 // import CasePicker from './../CasePicker'
-// import MultiplePicker from './../MultiplePicker'
+import MultiplePicker from './MultiplePicker'
 const Item = List.Item
 export default class FormCard extends Component {
 
 	initFormList = () => {
-		const {getFieldProps,formList,optArr} = this.props
+		const {getFieldProps,formList,optionsMap} = this.props
 
 		if(formList) {
 			const fieldName = formList.fieldName
@@ -30,33 +30,31 @@ export default class FormCard extends Component {
                             clear
                         >{title}</InputItem>
 			} else if(formList.type === "select" || formList.type === "relation") {
-				// let optdata = []
-				// if(optArr && optArr.length > 0) {
-				// 	optArr.map((item) => {
-				// 		for(let k in item) {
-				// 			if(k.indexOf(formList.fieldId) > -1) {
-				// 				item[k].map((it) => {
-				// 					it["label"] = it.title
-				// 					return false
-				// 				})
-				// 				optdata.push(item[k])
-				// 			}
-				// 		}
-				// 		return false
-				// 	})
-				// 	return <SelectPicker 
-                //                 formList={formList}
-                //                 optdata={optdata}
-                //                 disabled={formList.available===false?true:false}
-                //                 dot={formList.validators==="required"?true:false}
-                //                 {...getFieldProps(fieldName,{
-                //                     initialValue:fieldValue?fieldValue:"",
-                //                     rules:validators?[{
-                //                         required: true, message: `请选择${title}`,
-                //                       }]:"",
-                //                 })}
-                //             />
-				// }
+				if(optionsMap) {
+					let optdata
+					let opArr=[]
+					for(let k in optionsMap) {
+						if(k.indexOf(formList.fieldId) > -1) {
+							optdata=optionsMap[k]
+						}
+					}
+					if(optdata){
+						for(let k in optdata){
+							optdata[k]["label"]=optdata[k].title
+							opArr.push(optdata[k])
+						}
+						return <Picker
+									data={opArr}
+									cols={1}
+									{...getFieldProps(fieldName)}
+									title={`请选择${title}`}
+								>
+									<List.Item arrow="horizontal">
+										{title}
+									</List.Item>
+								</Picker>
+					}
+				}
 			} else if(formList.type === "date") {
 				let time = "";
 				let time_date = ""
@@ -96,13 +94,28 @@ export default class FormCard extends Component {
                             clear
                         >{title}</InputItem>
 			} else if(formList.type === "label") {
-				// return <MultiplePicker 
-                //             formList={formList}
-                //             optArr={optArr?optArr:[]}
-                //             {...getFieldProps(fieldName,{
-                //                 initialValue:fieldValue?fieldValue:"",
-                //             })}
-                //         />
+                if(optionsMap) {
+					let optdata
+					let opArr=[]
+					for(let k in optionsMap) {
+						if(k.indexOf(formList.fieldId) > -1) {
+							optdata=optionsMap[k]
+						}
+					}
+					if(optdata){
+						for(let k in optdata){
+							optdata[k]["label"]=optdata[k].title
+							opArr.push(optdata[k])
+						}
+						return <MultiplePicker 
+                                    formList={formList}
+                                    opArr={opArr}
+                                    {...getFieldProps(fieldName,{
+                                        initialValue:fieldValue?fieldValue:"",
+                                    })}
+                                />
+					}
+				}
 			} else if(formList.type === "file") {
 				// const files = fieldValue ? [{
 				// 	url: `/file-server/${fieldValue}`,

@@ -14,8 +14,6 @@ export default class Home extends Component {
         headerTintColor: '#fff',
         headerTitleStyle: {
           fontWeight: 'bold',
-          flex:1, 
-          textAlign: 'center'
         },
     };
     state={

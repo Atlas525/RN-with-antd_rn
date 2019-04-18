@@ -5,7 +5,7 @@ import superagent from 'superagent'
 import { createForm } from 'rc-form';
 import FormCard from './../components/formCard'
 import { List,Toast } from 'antd-mobile-rn';
-import { DeviceEventEmitter,StyleSheet,ToastAndroid ,Text, ScrollView,View } from 'react-native';
+import { DeviceEventEmitter,StyleSheet,ToastAndroid ,Text, ScrollView,View } from 'react-native'
 
 class Details extends Component {
     static navigationOptions = ({ navigation }) => {
@@ -17,8 +17,6 @@ class Details extends Component {
                 headerTintColor: '#fff',
                 headerTitleStyle: {
                     fontWeight: 'bold',
-                    flex:1, 
-                    textAlign: 'center',
                 },
                 headerLeft: (
                     <View>
@@ -42,7 +40,7 @@ class Details extends Component {
       }
     state = {
 		itemList: [],
-		optArr: [],
+		optionsMap:{},
 		herderName: "",
 		visibleNav: false,
         scrollIds: [],
@@ -99,7 +97,7 @@ class Details extends Component {
 			}
 		})
     }
-    reloadItemList = (itemList, premises, optArr) => {
+    reloadItemList = (itemList, premises, optionsMap) => {
 		if(premises && premises.length > 0) { //判断有无不可修改字段
 			const result = []
 			let re = []
@@ -170,7 +168,7 @@ class Details extends Component {
 							relation["validators"] = "required"
 							relation["fieldName"] = `${totname}[${index}].关系`
 							relation["relationSubdomain"] = relaOptions
-							optArr[0][`field_${item.composite.id}`] = relaOptions
+							optionsMap[`field_${item.composite.id}`] = relaOptions
 							re.push(relation)
 						}
 						//唯一编码
@@ -199,12 +197,12 @@ class Details extends Component {
 		})
 		this.setState({
 			itemList,
-			optArr,
+			optionsMap,
 			totalNameArr,
 		})
     }
     requestSelect = (selectId, itemList, premises) => {
-		const optArr = []
+		let optionsMap ={}
 		const formData = new FormData();
 		const {tokenName} = this.state
 		selectId.map((item) => {
@@ -224,17 +222,17 @@ class Details extends Component {
         }).then((response)=> {
             return response.json();
         }).then((data)=> {
-            optArr.push(data.optionsMap)
-            this.reloadItemList(itemList, premises, optArr)
+            optionsMap=data.optionsMap
+            this.reloadItemList(itemList, premises, optionsMap)
             this.setState({
-                optArr
+                optionsMap
             })
         }).catch((e)=> {
             Toast.fail(e)
         });
 	}
     render(){
-        const {itemList,optArr,animating,herderName,visibleNav,scrollIds} = this.state
+        const {itemList,animating,herderName,visibleNav,scrollIds,optionsMap} = this.state
         const {getFieldProps} = this.props.form;
         return (
             <ScrollView>
@@ -265,7 +263,7 @@ class Details extends Component {
                                                 formList = {it}
                                                 getFieldProps = {getFieldProps}
                                                 optionKey = {it.optionKey}
-                                                optArr = {optArr}
+                                                optionsMap = {optionsMap}
                                                 deleteList = {(e) => this.showAlert(it.deleteCode, e)}
                                                 />
                                     }) :null
@@ -287,14 +285,16 @@ const styles = StyleSheet.create({
     headerLeft:{
         color:'#fff',
         marginLeft:18
-
     },
     listHeader:{
         height:60,
         backgroundColor:'#F5F5F9',
-        padding:10
+        justifyContent:'center',
+        alignItems: 'flex-start',
+        flex: 1,
+        paddingHorizontal: 10
     },
     listHeaderText:{
-        fontSize: 18
+        fontSize: 18,
     }
 })
