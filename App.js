@@ -4,6 +4,7 @@ import Home from './app/scene/Home'
 import User from './app/scene/User'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ItemList from './app/scene/ItemList'
+import Details from './app/scene/Details'
 import {createStackNavigator, createAppContainer,createBottomTabNavigator } from 'react-navigation';
 
 const HomeStack = createStackNavigator({
@@ -49,10 +50,14 @@ const TabNav=createAppContainer(TabNavigator);
 const ItemStack = createStackNavigator({
   ItemList: { screen: ItemList },
 });
+const DetailsStack = createStackNavigator({
+  Details: { screen: Details },
+});
 const AppNavigator = createStackNavigator({
   Login: Login,
   TabNav: TabNav,
-  ItemList: ItemStack 
+  ItemList: ItemStack, 
+  Details: DetailsStack
 }, {
     initialRouteName: 'Login',
     mode: 'modal',

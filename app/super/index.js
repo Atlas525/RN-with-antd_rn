@@ -18,6 +18,7 @@ export default class Superagent {
 				.query(options.query || '')
 				.send(options.data || '')
 				.end((req, res) => {
+					//console.log(res)
 					if(res.status === 200) {
 						resolve(res.body)
 					} else if(res.status === 403) {

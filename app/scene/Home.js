@@ -50,7 +50,7 @@ export default class Home extends Component {
                     >
                     <List style={styles.list}>
                         {item.map((it)=>{
-                            return  <List.Item key={it.id}  onPressIn={()=>this.toList(it.id,it.title)}>
+                            return  <List.Item style={styles.smallList} key={it.id}  onPressIn={()=>this.toList(it.id,it.title)}>
                                             <Text style={styles.listText}>{it.title}</Text>
                                             <FontAwesome name={'angle-right'} style={styles.FontAwesome}  />
                                     </List.Item>
@@ -64,7 +64,7 @@ export default class Home extends Component {
             menuId,
             tokenName,
             title
-          })
+        })
     }
     render(){
         const {data,activeSections}=this.state
@@ -86,7 +86,7 @@ export default class Home extends Component {
 }
 const styles = StyleSheet.create({
     Panel:{
-        height:60,
+        height:65,
     },
     list:{
         marginLeft:10,
@@ -99,6 +99,9 @@ const styles = StyleSheet.create({
     listText:{
         paddingLeft:20,
         fontSize:18
+    },
+    smallList:{
+        height:60
     }
 
 })

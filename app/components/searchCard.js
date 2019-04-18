@@ -1,5 +1,5 @@
 import React, {Component} from 'react'
-import { DatePicker, List, Picker,Provider,InputItem } from 'antd-mobile-rn';
+import { DatePicker, List, Picker,InputItem } from 'antd-mobile-rn';
 const Item =List.Item
 
 export default class SearchCard extends Component {
@@ -32,6 +32,7 @@ export default class SearchCard extends Component {
 					}
 					if(optdata){
 						for(let k in optdata){
+							optdata[k]["label"]=optdata[k].title
 							opArr.push(optdata[k])
 						}
 						return <Picker
@@ -77,8 +78,6 @@ export default class SearchCard extends Component {
 		}
 	}
 	render() {
-		const {formList,getFieldProps,optArr} = this.props
-		const title = formList.title
 		return(
 			<Item style={{height:45}}>
                 {this.initFormList()}                

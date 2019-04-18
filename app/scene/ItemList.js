@@ -11,23 +11,28 @@ class ListContent extends Component {
     
     state = {
         visible: false,
-        spinnerRect: {},
         searchList: [],
         optArr: [],
         animating: false,
         active:false,
         refreshing: false,
+        searchwords:""
     }
     componentDidMount(){
         this.props.onRef(this)
+		this.requestList()
     }
     componentWillMount() {
         const { navigation } = this.props;
         const menuId = navigation.getParam('menuId', 'NO-ID');
         const tokenName=navigation.getParam('tokenName', 'NO-tokenName');
-		this.requestList(menuId,tokenName)
+        this.setState({
+            menuId,
+            tokenName
+        })
     } 
-    requestList=(menuId,tokenName,data)=>{
+    requestList=(data)=>{
+        const {menuId,tokenName}=this.state
         Super.super({
             url: `/api/entity/curd/list/${menuId}`,
             data:data
@@ -41,6 +46,7 @@ class ListContent extends Component {
                     menuId,
                     tokenName,
                     refreshing: false,
+                    searchwords:data,
                 })
             }
         })
@@ -60,16 +66,16 @@ class ListContent extends Component {
             list:[],
             pageInfo:''
         });
-        this.requestList(menuId,tokenName, data)
+        this.requestList(data)
     }
     _onRefresh = () => {
-        const {menuId,tokenName} = this.state
+        const {searchwords}=this.state
         this.setState({
             refreshing: true,
             list:[],
             pageInfo:''
         });
-        this.requestList(menuId,tokenName)
+        this.requestList(searchwords)
       }
     //显示下拉列表
     showPopover=()=> {
@@ -78,11 +84,15 @@ class ListContent extends Component {
         });
     }
     popoverNav=(key)=>{
-        const {searchList,tokenName}=this.state
+        const {searchList,tokenName,menuId}=this.state
         if(key===1){
             this.props.linkDrawer(searchList,tokenName)
         }else if(key===2){
-
+            this.props.navigation.navigate('Details',{
+                menuId,
+                tokenName,
+                title:'创建'
+            })
         }else if(key===3){
             this.props.navigation.navigate('Home')
         }else if(key===4){
@@ -102,7 +112,7 @@ class ListContent extends Component {
 		},tokenName).then((res) => {
 			if(res.status === "suc") {
 				Toast.success("删除成功！") //刷新列表 
-				this.requestList(menuId,tokenName)
+				this.requestList()
 			} else {
 				Toast.fail('删除失败！')
 			}
@@ -130,7 +140,7 @@ class ListContent extends Component {
                     <Text key={1} style={styles.Text} onPress={()=>this.popoverNav(1)}>
                         <SimpleLineIcons name={"magnifier"} size={16}/>&nbsp;&nbsp;筛选
                     </Text>
-                    <Text key={2} style={styles.Text}>
+                    <Text key={2} style={styles.Text} onPress={()=>this.popoverNav(2)}>
                         <SimpleLineIcons name={"plus"} size={16}/>&nbsp;&nbsp;创建
                     </Text>
                     <Text key={3} style={styles.Text} onPress={()=>this.popoverNav(3)}>
@@ -168,7 +178,7 @@ class ListContent extends Component {
                 {pageInfo ? <Button>
                                 {totalPage>=(pageInfo.pageNo+1)?<Text onPress={()=>this.goPage(+1)}>--点击加载下一页--</Text>:
                                 <Text>没有更多了···</Text>}
-                            </Button>: <ActivityIndicator style={{marginTop:24}} text="加载中..."/>} 
+                            </Button>: <ActivityIndicator text="加载中..."/>} 
             </ScrollView>
         )
     }
@@ -176,8 +186,6 @@ class ListContent extends Component {
 
 export default class DrawerBox extends Component {
     static navigationOptions = ({ navigation }) => {
-        const {state, setParams} = navigation;
-        console.log(navigation)
         return {
                 title: navigation.getParam('title', 'A Nested Details Screen'),
                 headerStyle: {
@@ -270,14 +278,24 @@ export default class DrawerBox extends Component {
             }).catch((e)=> {
                 console.log(e);
             });
-        }
-        
+        }       
+    }
+    handleSearch = (values) => {
+		this.ListContent.requestList(values)
+		this.setState({
+            openDrawer:false,
+			//searchwords: values
+		})
 	}
     render(){
         const {openDrawer,searchList,optionsMap}=this.state
         const sidebar = (
             <ScrollView>
-                <SearchBar navigation={this.props.navigation} searchList={searchList} optionsMap={optionsMap}/>
+                <SearchBar 
+                    navigation={this.props.navigation} 
+                    searchList={searchList} 
+                    optionsMap={optionsMap} 
+                    handleSearch={this.handleSearch}/>
             </ScrollView>
           );
         return(

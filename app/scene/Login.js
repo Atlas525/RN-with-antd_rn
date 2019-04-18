@@ -19,7 +19,7 @@ export default class Login extends Component {
     loadAccountInfo = () => {
         AsyncStorage.getItem("userinfo").then(result => {
             const obj=JSON.parse(result)
-            console.log(result)
+            //console.log(result)
             this.setState({
                 username:obj.username,
                 password:obj.password,
