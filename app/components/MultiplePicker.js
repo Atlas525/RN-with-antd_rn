@@ -89,9 +89,12 @@ export default class MultiplePicker extends Component {
                     popup
                     visible={vismodal}
                     onClose={this.onClose}
-                    animationType="slide-up"
+					animationType="slide-up"
+					maskClosable={true}
                     >
-                    <List renderHeader={() => <Text style={styles.selectTitle}>{`请选择${title}`}</Text>}>
+					<List 
+						renderHeader={() => <Text style={styles.selectTitle}>{`请选择${title}`}</Text>}
+					>
                         <View>
                             {optdata?optdata.map(i => (
                                 <CheckboxItem  

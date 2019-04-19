@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import Super from "./../super"
 import {DeviceEventEmitter,StyleSheet,ScrollView,View } from 'react-native';
 import { createForm } from 'rc-form';
-import SearchCard from './../components/searchCard'
+import SearchCard from './../components/SearchCard'
 import Units from './../units'
 import {List,InputItem,Button } from "antd-mobile-rn";
 const Item =List.Item

@@ -1,14 +1,15 @@
 import React, {Component} from 'react'
-import { DatePicker, List, InputItem,Picker } from 'antd-mobile-rn';
-// import ImgBox from './../ImgBox'
-// import SelectPicker from './../SelectPicker'
-// import CasePicker from './../CasePicker'
+import { DatePicker, List, InputItem,Picker,Badge } from 'antd-mobile-rn';
+import {StyleSheet ,Text, ScrollView,View } from 'react-native'
+import ImgBox from './ImgBox'
+import CasePicker from './CasePicker'
 import MultiplePicker from './MultiplePicker'
 const Item = List.Item
+
 export default class FormCard extends Component {
 
 	initFormList = () => {
-		const {getFieldProps,formList,optionsMap} = this.props
+		const {getFieldProps,formList,optionsMap,tokenName} = this.props
 
 		if(formList) {
 			const fieldName = formList.fieldName
@@ -28,8 +29,14 @@ export default class FormCard extends Component {
                             key={fieldId}
                             editable={formList.available===false?false:true}
                             clear
-                        >{title}</InputItem>
-			} else if(formList.type === "select" || formList.type === "relation") {
+                        >
+							<Badge dot={formList.validators?true:false}>
+								<Text style={{fontSize:17,color:'#010101'}}>
+									{title}
+								</Text>
+							</Badge>
+						</InputItem>
+			} else if(formList.type === "select" || formList.type === "relation" || formList.type === "preselect" ) {
 				if(optionsMap) {
 					let optdata
 					let opArr=[]
@@ -47,8 +54,7 @@ export default class FormCard extends Component {
 									data={opArr}
 									cols={1}
 									{...getFieldProps(fieldName)}
-									title={`请选择${title}`}
-								>
+									title={`请选择${title}`}>
 									<List.Item arrow="horizontal">
 										{title}
 									</List.Item>
@@ -76,12 +82,13 @@ export default class FormCard extends Component {
                             <List.Item arrow="horizontal">{title}</List.Item>
                         </DatePicker>
 			} else if(formList.type === "caselect") {
-				// return <CasePicker
-                //             formList={formList}
-                //             {...getFieldProps(fieldName,{
-                //                 initialValue:fieldValue?fieldValue:"",
-                //             })}
-                //             />
+				return <CasePicker
+							formList={formList}
+							tokenName={tokenName}
+                            {...getFieldProps(fieldName,{
+                                initialValue:fieldValue?fieldValue:"",
+                            })}
+                            />
 			} else if(formList.type === "decimal" || formList.type === "int") {
 				return <InputItem
                             {...getFieldProps(fieldName,{
@@ -117,17 +124,15 @@ export default class FormCard extends Component {
 					}
 				}
 			} else if(formList.type === "file") {
-				// const files = fieldValue ? [{
-				// 	url: `/file-server/${fieldValue}`,
-				// 	id: fieldId,
-				// }] : []
-				// const imgPick = <ImgBox 
-                //                 files={files}
-                //                 {...getFieldProps(fieldName)}
-                //                 />
-				// return <div>
-                //             <List.Item extra={imgPick}>{title}</List.Item>                            
-                //         </div>
+				const files = fieldValue ? [{
+					url: `/file-server/${fieldValue}`,
+					id: fieldId,
+				}] :null
+				return <ImgBox 
+							formList={formList}
+							files={files}
+							{...getFieldProps(fieldName)}
+						/>                  
 			} else if(formList.type === "onlycode") {
 				return <input
                             {...getFieldProps(fieldName,{
@@ -136,19 +141,21 @@ export default class FormCard extends Component {
                             type="hidden"
                         />
 			} else if(formList.type === "deletebtn") {
-				return <p className="deteleLine">
-                            <span 
-                                className="iconfont" 
-                                style={{float:"right",top:"0"}}
-                                onClick={this.props.deleteList}
-                                >&#xe676;</span>
-                        </p>
+				// return <p className="deteleLine">
+                //             <span 
+                //                 className="iconfont" 
+                //                 style={{float:"right",top:"0"}}
+                //                 onClick={this.props.deleteList}
+                //                 >&#xe676;</span>
+                //         </p>
+			}else{
+				return null
 			}
 		}
 	}
 	render() {
 		return(
-            <Item style={{height:45}}>
+            <Item style={{height:45,}}>
                 {this.initFormList()}                
             </Item>
 		)

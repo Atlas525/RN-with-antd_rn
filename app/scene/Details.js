@@ -1,12 +1,14 @@
 import React, {Component} from 'react';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
 import Super from './../super'
-import superagent from 'superagent'
 import { createForm } from 'rc-form';
-import FormCard from './../components/formCard'
+import FormCard from './../components/FormCard'
 import { List,Toast } from 'antd-mobile-rn';
-import { DeviceEventEmitter,StyleSheet,ToastAndroid ,Text, ScrollView,View } from 'react-native'
+import {StyleSheet ,Text, ScrollView,View } from 'react-native'
+import Popover,{ Rect } from 'react-native-popover-view'
 
+const rect=new Rect(290, 0, 220, 40)
 class Details extends Component {
     static navigationOptions = ({ navigation }) => {
         return {
@@ -20,12 +22,12 @@ class Details extends Component {
                 },
                 headerLeft: (
                     <View>
-                    <SimpleLineIcons
-                        name={'arrow-left'} 
-                        size={20} 
-                        style={styles.headerLeft}  
-                        onPress={navigation.getParam('goBack')}/>
-                        </View>
+                        <SimpleLineIcons
+                            name={'arrow-left'} 
+                            size={20} 
+                            style={styles.headerLeft}  
+                            onPress={navigation.getParam('goBack')}/>
+                    </View>
                   ),
                 headerRight: (
                     <View>
@@ -44,14 +46,26 @@ class Details extends Component {
 		herderName: "",
 		visibleNav: false,
         scrollIds: [],
-        menuId:""
-    }
+		menuId:"",
+		visiblePop:false,
+	}
     componentWillMount(){
         const {menuId,code,tokenName} = this.props.navigation.state.params
         this.setState({menuId,code,tokenName})
     }
     componentDidMount(){
         this.loadRequest()
+        this.props.navigation.setParams({ showPopover: this.showPopover });
+        this.props.navigation.setParams({ goBack: this.goBack });
+	}
+	//显示下拉列表
+    showPopover=()=> {
+        this.setState({
+            visiblePop: true,
+        });
+	}
+	goBack=()=>{
+        this.props.navigation.navigate('ItemList')
     }
     loadRequest = () => {
         const {menuId, code,tokenName}=this.state
@@ -74,14 +88,14 @@ class Details extends Component {
 				res.entity.fieldGroups.map((item) => {
 					if(item.fields) {
 						item.fields.map((it) => { //基础信息里面的选择项
-							if(it.type === "select" || it.type === "label") {
+							if(it.type === "select" || it.type === "label" || it.type === "preselect") {
 								selectId.push(it.fieldId)
 							}
 							return false
 						})
 					} else if(item.descs) {
 						item.descs.map((it) => { //其他列表里面的选择项
-							if(it.type === "select" || it.type === "label") {
+							if(it.type === "select" || it.type === "label" || it.type === "preselect") {
 								selectId.push(it.fieldId)
 							}
 							return false
@@ -226,35 +240,81 @@ class Details extends Component {
             this.reloadItemList(itemList, premises, optionsMap)
             this.setState({
                 optionsMap
-            })
+			})
+			console.log(optionsMap)
         }).catch((e)=> {
             Toast.fail(e)
         });
 	}
+	popoverNav=(key)=>{
+        const {searchList,tokenName,menuId}=this.state
+        if(key===1){
+            this.props.linkDrawer(searchList,tokenName)
+        }else if(key===2){
+            this.props.navigation.navigate('Details',{
+                menuId,
+                tokenName,
+                title:'创建'
+            })
+        }else if(key===3){
+            this.props.navigation.navigate('Home')
+        }else if(key===4){
+            this.props.navigation.navigate('Login')
+        }else if(key===5){
+            this.props.navigation.navigate('User')
+        }
+        this.setState({visible: false});
+    }
     render(){
-        const {itemList,animating,herderName,visibleNav,scrollIds,optionsMap} = this.state
+        const {itemList,tokenName,herderName,visibleNav,scrollIds,optionsMap,visiblePop} = this.state
         const {getFieldProps} = this.props.form;
         return (
             <ScrollView>
+				<Popover
+					fromRect={rect}
+					onClose={()=>this.setState({visiblePop: false})}
+					placement={'bottom'}
+					popoverStyle={{width:100}}
+					isVisible={visiblePop}>
+					<View>
+						<Text key={1} style={styles.Text} onPress={()=>this.popoverNav(1)}>
+							<SimpleLineIcons name={"magnifier"} size={16}/>&nbsp;&nbsp;筛选
+						</Text>
+						<Text key={2} style={styles.Text} onPress={()=>this.popoverNav(2)}>
+							<SimpleLineIcons name={"plus"} size={16}/>&nbsp;&nbsp;创建
+						</Text>
+						<Text key={3} style={styles.Text} onPress={()=>this.popoverNav(3)}>
+							<SimpleLineIcons name={"home"} size={16}/>&nbsp;&nbsp;首页
+						</Text>
+						<Text key={4} style={styles.Text} onPress={()=>this.popoverNav(4)}>
+							<SimpleLineIcons name={"logout"} size={16}/>&nbsp;&nbsp;退出
+						</Text>                    
+						<Text key={5} style={styles.Text} onPress={()=>this.popoverNav(5)}>
+							<SimpleLineIcons name={"user"} size={16}/>&nbsp;&nbsp;用户
+						</Text>
+					</View>
+				</Popover>
                 <View>
                     {itemList.map((item, i) => {
                         return <List
                                     id = {item.title}	
                                     key = {`${item.id}[${i}]`}
                                     renderHeader = {() =><View style={styles.listHeader}>
-                                                            <Text style={styles.listHeaderText}> {item.title} </Text>
+                                                            <Text style={styles.listHeaderText}>{item.title}</Text>
                                                             {item.composite ?
-                                                                <View>
-                                                                    {/* <span 	className = "iconfont"
-                                                                            onClick = {() => this.addList(i)} > &#xe63d; </span> 
-                                                                            {item.stmplId ? 
-                                                                            <span 	className = "iconfont"
-                                                                                    onClick = {() => this.SelectTemplate.onOpenChange(item)} >
-                                                                                    &#xe6f4; 
-                                                                            </span>:""
-                                                                    } */}
-                                                                </View>:null
-                                                            } 
+                                                            <View style={styles.icons}>
+                                                                <AntDesign 
+                                                                    onPress = {() => this.addList(i)} 
+                                                                    name={'addfolder'} 
+                                                                    size={22}/>
+                                                                {item.stmplId ? 
+																<AntDesign
+																	onPress = {() => this.SelectTemplate.onOpenChange(item)} 
+																	name={'copy1'}
+																	style={{marginLeft:15}}
+																	size={22}/>:null
+                                                                }
+                                                            </View>:null}                                                       
                                                         </View>}
                                 >
                                 {item.fields ? item.fields.map((it, index) => {
@@ -264,7 +324,8 @@ class Details extends Component {
                                                 getFieldProps = {getFieldProps}
                                                 optionKey = {it.optionKey}
                                                 optionsMap = {optionsMap}
-                                                deleteList = {(e) => this.showAlert(it.deleteCode, e)}
+												deleteList = {(e) => this.showAlert(it.deleteCode, e)}
+												tokenName={tokenName}
                                                 />
                                     }) :null
                                 }	 
@@ -289,12 +350,23 @@ const styles = StyleSheet.create({
     listHeader:{
         height:60,
         backgroundColor:'#F5F5F9',
-        justifyContent:'center',
-        alignItems: 'flex-start',
+        flexDirection:'row',
+        alignItems:'center',
         flex: 1,
-        paddingHorizontal: 10
+        paddingHorizontal: 15
     },
     listHeaderText:{
         fontSize: 18,
-    }
+    },
+    icons:{
+        flex:1,
+        flexDirection:'row',
+        justifyContent:"flex-end"
+	},
+	Text:{
+        paddingLeft:0,
+        textAlign: 'center',
+        lineHeight:40,
+        fontSize: 18
+    },
 })

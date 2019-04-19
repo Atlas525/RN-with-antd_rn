@@ -2,8 +2,8 @@ import React, {Component} from 'react';
 import Super from "./../super"
 import AsyncStorage from '@react-native-community/async-storage';
 import { DeviceEventEmitter,StyleSheet,ToastAndroid ,Text, View, } from 'react-native';
-import { Button,InputItem } from 'antd-mobile-rn';
-
+import { Button,InputItem,Checkbox } from 'antd-mobile-rn';
+const AgreeItem = Checkbox.AgreeItem
 
 export default class Login extends Component {
     static navigationOptions = {
@@ -12,6 +12,7 @@ export default class Login extends Component {
     state={
         username: null,
         password: null,
+		remember: true
     }
     componentDidMount(){
         this.loadAccountInfo()
@@ -32,7 +33,7 @@ export default class Login extends Component {
         ToastAndroid.showWithGravity(msg, ToastAndroid.SHORT,ToastAndroid.CENTER);
     }
     handleSubmit=()=>{
-        const {username,password}=this.state
+        const {username,password,remember}=this.state
         if(username && password){
             let user={}
             user['username']=username
@@ -45,20 +46,18 @@ export default class Login extends Component {
                     this.toast('服务器连接失败');
                 } else {
                     if(res.status === 'suc') {
-                        //console.log(res.token)
-                        // if(remember) {
-                        //     const accountInfo = value.username + '&' + value.password;
-                        //     Units.setCookie('accountInfo', accountInfo, 30);
-                        // } else {
-                        //     Units.delCookie('accountInfo');
-                        //     this.setState({
-                        //         username: "",
-                        //         password: "",
-                        //     })
-                        // }
+                        if(remember) {
+                            AsyncStorage.setItem("userinfo", JSON.stringify(user));
+                        } else {
+                            AsyncStorage.removeItem('userinfo');
+                            this.setState({
+                                username: "",
+                                password: "",
+                            })
+                        }
                         this.props.navigation.navigate('TabNav')
                         DeviceEventEmitter.emit('tokenName',res.token);
-                        AsyncStorage.setItem("userinfo", JSON.stringify(user));
+                       // AsyncStorage.setItem("userinfo", JSON.stringify(user));
                     } else if(res.errorMsg) {
                         this.toast(res.errorMsg+"!");
                     }
@@ -68,13 +67,19 @@ export default class Login extends Component {
             this.toast('用户名或密码错误！')
         }
     }
+    remchange = (e) => {
+		this.setState({
+			remember: e.target.checked
+		});
+	}
     render() {
+        const {username,password,remember} = this.state
         return (
             <View style={styles.container}>
                 <Text style={styles.H1}>欢迎登陆</Text>
                 <InputItem
                     onChange={text => this.setState({username: text})} 
-                    value={this.state.username}
+                    value={username}
                     clear
                     style={styles.inputs}
                     >
@@ -82,13 +87,16 @@ export default class Login extends Component {
                 </InputItem>
                 <InputItem
                     onChange={text => this.setState({password: text})} 
-                    value={this.state.password}
+                    value={password}
                     clear
                     type="password"
                     style={styles.inputs}
                     >
                     密码
                 </InputItem>
+                <AgreeItem onChange={this.remchange} checked={remember}>
+                    记住密码
+                </AgreeItem>
                 <Button style={styles.btn} onPressIn={this.handleSubmit} type="primary">
                     <Text>登录</Text>
                 </Button>
