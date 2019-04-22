@@ -1,15 +1,16 @@
 import React, {Component} from 'react'
 import { DatePicker, List, InputItem,Picker,Badge } from 'antd-mobile-rn';
-import {StyleSheet ,Text, ScrollView,View } from 'react-native'
+import {StyleSheet ,Text, ScrollView,View,TextInput } from 'react-native'
 import ImgBox from './ImgBox'
 import CasePicker from './CasePicker'
 import MultiplePicker from './MultiplePicker'
+import AntDesign from 'react-native-vector-icons/AntDesign';
 const Item = List.Item
 
 export default class FormCard extends Component {
 
 	initFormList = () => {
-		const {getFieldProps,formList,optionsMap,tokenName} = this.props
+		const {getFieldProps,formList,optionsMap,tokenName,index} = this.props
 
 		if(formList) {
 			const fieldName = formList.fieldName
@@ -51,12 +52,22 @@ export default class FormCard extends Component {
 							opArr.push(optdata[k])
 						}
 						return <Picker
+									{...getFieldProps(fieldName,{
+										initialValue:fieldValue?[fieldValue]:null,
+										rules:validators?[{
+											required: true, message: `请选择${title}`,
+										}]:null,
+									})}
 									data={opArr}
 									cols={1}
-									{...getFieldProps(fieldName)}
+									itemStyle={{marginVertical:5}}
 									title={`请选择${title}`}>
 									<List.Item arrow="horizontal">
-										{title}
+									<Badge dot={formList.validators?true:false}>
+										<Text style={{fontSize:17,color:'#010101'}}>
+											{title}
+										</Text>
+									</Badge>
 									</List.Item>
 								</Picker>
 					}
@@ -134,20 +145,20 @@ export default class FormCard extends Component {
 							{...getFieldProps(fieldName)}
 						/>                  
 			} else if(formList.type === "onlycode") {
-				return <input
+				return <TextInput 
                             {...getFieldProps(fieldName,{
                                 initialValue:fieldValue?fieldValue:"",
-                            })}
-                            type="hidden"
-                        />
+							})}
+							style={{height:0,margin:0,padding:0,}}
+							/>
 			} else if(formList.type === "deletebtn") {
-				// return <p className="deteleLine">
-                //             <span 
-                //                 className="iconfont" 
-                //                 style={{float:"right",top:"0"}}
-                //                 onClick={this.props.deleteList}
-                //                 >&#xe676;</span>
-                //         </p>
+				return <Item style={index!=0?styles.borderTop:null}>
+                            <AntDesign 
+                                name="closecircleo"
+								onPress={this.props.deleteList}
+								size={23}
+                                />
+                        </Item >
 			}else{
 				return null
 			}
@@ -155,9 +166,14 @@ export default class FormCard extends Component {
 	}
 	render() {
 		return(
-            <Item style={{height:45,}}>
-                {this.initFormList()}                
-            </Item>
+           this.initFormList()
 		)
 	}
 }
+const styles = StyleSheet.create({    
+	borderTop:{
+		borderTopColor:'#F5F5F9',
+		borderTopWidth:10
+	}
+	
+})

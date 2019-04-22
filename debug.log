@@ -1,3 +1,5 @@
 [0412/104131.187:ERROR:http_transport_win.cc(273)] WinHttpSendRequest: ï¿½ï¿½ï¿½ï¿½ï¿½É¹ï¿½ï¿½ï¿½É¡ï¿½ (0x0)
 [0412/173628.327:ERROR:http_transport_win.cc(273)] WinHttpSendRequest: ï¿½ï¿½ï¿½ï¿½ï¿½É¹ï¿½ï¿½ï¿½É¡ï¿½ (0x0)
 [0418/170602.917:ERROR:http_transport_win.cc(273)] WinHttpSendRequest: ²Ù×÷³É¹¦Íê³É¡£ (0x0)
+[0422/172511.297:ERROR:http_transport_win.cc(273)] WinHttpSendRequest: ²Ù×÷³É¹¦Íê³É¡£ (0x0)
+[0422/181444.398:ERROR:file_io.cc(89)] ReadExactly: expected 36, observed 0

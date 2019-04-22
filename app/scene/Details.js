@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
 import Super from './../super'
+import TemplateDrawer from './../components/TemplateDrawer'
 import { createForm } from 'rc-form';
 import FormCard from './../components/FormCard'
 import { List,Toast } from 'antd-mobile-rn';
@@ -241,7 +242,6 @@ class Details extends Component {
             this.setState({
                 optionsMap
 			})
-			console.log(optionsMap)
         }).catch((e)=> {
             Toast.fail(e)
         });
@@ -264,12 +264,124 @@ class Details extends Component {
             this.props.navigation.navigate('User')
         }
         this.setState({visible: false});
-    }
+	}
+	addList = (index, data) => {
+		let {itemList,optionsMap} = this.state
+		const needList = itemList[index]
+		const i = needList.i >= 0 ? (needList.i + 1) : 0
+		const descs = []
+		const totalNm = needList.composite.name
+		//删除按钮                                              
+		const deletebtn = {}
+		deletebtn["type"] = "deletebtn"
+		deletebtn["deleteCode"] = `${totalNm}[${i}]`
+		deletebtn["fieldName"] = `${totalNm}[${i}].deleteCode`
+		descs.push(deletebtn)
+		if(needList.composite.addType === 5) { //添加关系选择
+			const relation = {}
+			const composite = needList.composite
+			const relaOptions = []
+			composite.relationSubdomain.map((item) => {
+				const list = {}
+				list["title"] = item
+				list["value"] = item
+				list["label"] = item
+				relaOptions.push(list)
+				return false
+			})
+			relation["fieldId"] = composite.id
+			relation["type"] = "relation"
+			relation["title"] = "关系"
+			relation["validators"] = "required"
+			relation["fieldName"] = `${totalNm}.关系`
+			relation["relationSubdomain"] = relaOptions
+			relation["value"] = composite.relationSubdomain.length===1?composite.relationSubdomain[0]:null
+			descs.push(relation)
+			optionsMap[`field_${composite.id}`] = relaOptions
+		}
+		const onlycode = {}
+		onlycode["type"] = "onlycode"
+		onlycode["fieldName"] = `${totalNm}.code`
+		if(data) {
+			onlycode["value"] = data["唯一编码"]
+		}
+		descs.push(onlycode)
+
+		descs.push(...needList.descs)
+		const list = {}
+		list["i"] = i
+		list["id"] = needList.id
+		list["title"] = needList.title
+		list["composite"] = needList.composite
+		list["descs"] = needList.descs
+		if(needList.stmplId) {
+			list["stmplId"] = needList.stmplId
+		}
+		const arr = []
+		descs.map((item) => {
+			const lasname = item.fieldName.split(".")[1]
+			const list = {}
+			for(let k in item) {
+				if(k === "fieldName") {
+					list[k] = `${totalNm}[${i}].${lasname}`
+				} else {
+					list[k] = item[k]
+				}
+				if(data) { //从模板中赋值
+					for(let e in data) {
+						const itemN = item["fieldName"].split(".")[1]
+						const dataN = e.split(".")[1]
+						if(itemN === dataN) {
+							list["value"] = data[e]
+						}
+					}
+				}
+			}
+			arr.push(list)
+			return false
+		})
+		if(needList.fields) { //有fields,说明添加了1次以上
+			const field = needList.fields
+			field.push(...arr)
+			list["fields"] = field
+		} else {
+			list["fields"] = arr
+		}
+		itemList.splice(index, 1, list)
+		this.setState({
+			itemList,
+			optionsMap
+		})
+	}
+	onRef = (ref) => {
+		this.SelectTemplate = ref
+	}
+	loadTemplate = (entities, stmplId, tempcodes) => {
+		const {itemList} = this.state
+		if(tempcodes) {
+			itemList.map((item, index) => {
+				if(item.stmplId && item.stmplId === stmplId) {
+					const codeArr = tempcodes.split(",")
+					codeArr.map((it) => {
+						this.addList(index, entities[it])
+						return false
+					})
+				}
+				return false
+			})
+		}
+	}
     render(){
-        const {itemList,tokenName,herderName,visibleNav,scrollIds,optionsMap,visiblePop} = this.state
+        const {itemList,tokenName,visibleNav,scrollIds,optionsMap,visiblePop,menuId} = this.state
         const {getFieldProps} = this.props.form;
         return (
-            <ScrollView>
+			<TemplateDrawer
+				onRef = {this.onRef}
+				menuId = {menuId}
+				loadTemplate = {this.loadTemplate}
+				tokenName={tokenName}
+				>
+				<ScrollView>
 				<Popover
 					fromRect={rect}
 					onClose={()=>this.setState({visiblePop: false})}
@@ -298,7 +410,7 @@ class Details extends Component {
                     {itemList.map((item, i) => {
                         return <List
                                     id = {item.title}	
-                                    key = {`${item.id}[${i}]`}
+									key = {`${item.id}[${i}]`}
                                     renderHeader = {() =><View style={styles.listHeader}>
                                                             <Text style={styles.listHeaderText}>{item.title}</Text>
                                                             {item.composite ?
@@ -309,7 +421,7 @@ class Details extends Component {
                                                                     size={22}/>
                                                                 {item.stmplId ? 
 																<AntDesign
-																	onPress = {() => this.SelectTemplate.onOpenChange(item)} 
+																	onPress = {() => this.SelectTemplate.onOpen(item)} 
 																	name={'copy1'}
 																	style={{marginLeft:15}}
 																	size={22}/>:null
@@ -326,6 +438,7 @@ class Details extends Component {
                                                 optionsMap = {optionsMap}
 												deleteList = {(e) => this.showAlert(it.deleteCode, e)}
 												tokenName={tokenName}
+												index={index}
                                                 />
                                     }) :null
                                 }	 
@@ -334,6 +447,8 @@ class Details extends Component {
                     } 
                     </View>
                 </ScrollView> 
+			</TemplateDrawer>
+            
         )
     }
 }
@@ -341,7 +456,7 @@ export default createForm()(Details);
 const styles = StyleSheet.create({    
     headerRight:{
         color:'#fff',
-        marginRight:18
+		marginRight:18,
     },
     headerLeft:{
         color:'#fff',
@@ -353,7 +468,8 @@ const styles = StyleSheet.create({
         flexDirection:'row',
         alignItems:'center',
         flex: 1,
-        paddingHorizontal: 15
+		paddingHorizontal: 15,
+		borderWidth:0,
     },
     listHeaderText:{
         fontSize: 18,

@@ -8,7 +8,7 @@ const AgreeItem = Checkbox.AgreeItem
 export default class Login extends Component {
     static navigationOptions = {
         header:null
-      };
+    };
     state={
         username: null,
         password: null,
@@ -46,18 +46,9 @@ export default class Login extends Component {
                     this.toast('服务器连接失败');
                 } else {
                     if(res.status === 'suc') {
-                        if(remember) {
-                            AsyncStorage.setItem("userinfo", JSON.stringify(user));
-                        } else {
-                            AsyncStorage.removeItem('userinfo');
-                            this.setState({
-                                username: "",
-                                password: "",
-                            })
-                        }
+                        remember?AsyncStorage.setItem("userinfo", JSON.stringify(user)): AsyncStorage.removeItem('userinfo')
                         this.props.navigation.navigate('TabNav')
                         DeviceEventEmitter.emit('tokenName',res.token);
-                       // AsyncStorage.setItem("userinfo", JSON.stringify(user));
                     } else if(res.errorMsg) {
                         this.toast(res.errorMsg+"!");
                     }
@@ -83,7 +74,7 @@ export default class Login extends Component {
                     clear
                     style={styles.inputs}
                     >
-                    用户名
+                    <Text style={styles.words}>用户名</Text>
                 </InputItem>
                 <InputItem
                     onChange={text => this.setState({password: text})} 
@@ -92,10 +83,10 @@ export default class Login extends Component {
                     type="password"
                     style={styles.inputs}
                     >
-                    密码
+                    <Text style={styles.words}>密码</Text>
                 </InputItem>
-                <AgreeItem onChange={this.remchange} checked={remember}>
-                    记住密码
+                <AgreeItem onChange={this.remchange} checked={remember} style={styles.AgreeItem}>
+                    <Text style={styles.words}>记住密码</Text>
                 </AgreeItem>
                 <Button style={styles.btn} onPressIn={this.handleSubmit} type="primary">
                     <Text>登录</Text>
@@ -113,7 +104,7 @@ const styles = StyleSheet.create({
     },
     H1:{
         textAlign:'center',
-        fontSize: 24,
+        fontSize: 26,
         marginBottom: 30
     },
     btn:{
@@ -122,6 +113,15 @@ const styles = StyleSheet.create({
     },
     inputs:{
         marginLeft:0,
+        fontSize:27,
+        marginTop:10,
+    },
+    AgreeItem:{
+        fontSize:20,
+        marginTop:20
+    },
+    words:{
+        fontSize:18
     }
 })
   
