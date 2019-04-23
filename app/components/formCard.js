@@ -4,7 +4,8 @@ import {StyleSheet ,Text, ScrollView,View,TextInput } from 'react-native'
 import ImgBox from './ImgBox'
 import CasePicker from './CasePicker'
 import MultiplePicker from './MultiplePicker'
-import AntDesign from 'react-native-vector-icons/AntDesign';
+import SelectPicker from './SelectPicker'
+import Feather from 'react-native-vector-icons/Feather';
 const Item = List.Item
 
 export default class FormCard extends Component {
@@ -24,7 +25,7 @@ export default class FormCard extends Component {
                                 initialValue:fieldValue?fieldValue:"",
                                 rules:validators?[{
                                     required: true, message: `请选择${title}`,
-                                  }]:"",
+                                  }]:null,
                             })}
                             placeholder={`请输入${title}`}
                             key={fieldId}
@@ -51,25 +52,25 @@ export default class FormCard extends Component {
 							optdata[k]["label"]=optdata[k].title
 							opArr.push(optdata[k])
 						}
-						return <Picker
+						return <SelectPicker 
+									formList={formList}
+									optdata={optdata}
+									disabled={formList.available===false?true:false}
 									{...getFieldProps(fieldName,{
-										initialValue:fieldValue?[fieldValue]:null,
+										initialValue:fieldValue?fieldValue:"",
 										rules:validators?[{
 											required: true, message: `请选择${title}`,
 										}]:null,
 									})}
-									data={opArr}
-									cols={1}
-									itemStyle={{marginVertical:5}}
-									title={`请选择${title}`}>
-									<List.Item arrow="horizontal">
+								>	
+								<Item arrow="horizontal">
 									<Badge dot={formList.validators?true:false}>
 										<Text style={{fontSize:17,color:'#010101'}}>
 											{title}
 										</Text>
 									</Badge>
-									</List.Item>
-								</Picker>
+									</Item>
+								</SelectPicker>
 					}
 				}
 			} else if(formList.type === "date") {
@@ -90,7 +91,7 @@ export default class FormCard extends Component {
                             onOk={e => console.log('ok', e)}
                             onDismiss={e => console.log('dismiss', e)}
                         >
-                            <List.Item arrow="horizontal">{title}</List.Item>
+                            <Item arrow="horizontal">{title}</Item>
                         </DatePicker>
 			} else if(formList.type === "caselect") {
 				return <CasePicker
@@ -110,7 +111,13 @@ export default class FormCard extends Component {
                             placeholder={`请输入${title}`}
                             key={fieldId}
                             clear
-                        >{title}</InputItem>
+                        >
+						<Badge dot={formList.validators?true:false}>
+							<Text style={{fontSize:17,color:'#010101'}}>
+								{title}
+							</Text>
+						</Badge>
+					</InputItem>
 			} else if(formList.type === "label") {
                 if(optionsMap) {
 					let optdata
@@ -153,11 +160,13 @@ export default class FormCard extends Component {
 							/>
 			} else if(formList.type === "deletebtn") {
 				return <Item style={index!=0?styles.borderTop:null}>
-                            <AntDesign 
-                                name="closecircleo"
+							<View style={styles.delebtn}>
+                            <Feather 
+                                name="delete"
 								onPress={this.props.deleteList}
 								size={23}
                                 />
+							</View>
                         </Item >
 			}else{
 				return null
@@ -165,8 +174,9 @@ export default class FormCard extends Component {
 		}
 	}
 	render() {
-		return(
-           this.initFormList()
+		return(<List>
+           			{this.initFormList()}
+		   		</List>
 		)
 	}
 }
@@ -174,6 +184,11 @@ const styles = StyleSheet.create({
 	borderTop:{
 		borderTopColor:'#F5F5F9',
 		borderTopWidth:10
+	},
+	delebtn:{
+		flex:1,
+		flexDirection: 'row',
+		justifyContent: 'flex-end',
 	}
 	
 })

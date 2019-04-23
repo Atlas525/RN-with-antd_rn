@@ -64,10 +64,16 @@ export default class TemplateDrawer extends Component {
 		this.setState({
 			showDrawer:isOpen,
 		})
+		if(!isOpen){
+			this.setState({
+				checkboxdata: [],
+			})
+		}
 	}
 	close=()=>{
 		this.setState({
 			showDrawer:false,
+			checkboxdata: [],
 		})
 	}
 	handleDrawerOk = () => {
@@ -108,6 +114,7 @@ export default class TemplateDrawer extends Component {
 				checkboxdata.push(value)
 			}
 		}
+		console.log(checkboxdata)
 		this.setState({
 			checkboxdata,
 		})

@@ -1,15 +1,19 @@
 import React, {Component} from 'react';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
+import Feather from 'react-native-vector-icons/Feather';
 import Super from './../super'
 import TemplateDrawer from './../components/TemplateDrawer'
 import { createForm } from 'rc-form';
 import FormCard from './../components/FormCard'
-import { List,Toast } from 'antd-mobile-rn';
+import { List,Toast,Modal,ActivityIndicator } from 'antd-mobile-rn';
 import {StyleSheet ,Text, ScrollView,View } from 'react-native'
 import Popover,{ Rect } from 'react-native-popover-view'
+import superagent from 'superagent'
+const Alert = Modal.alert;
 
 const rect=new Rect(290, 0, 220, 40)
+const api='http://139.196.123.44/datacenter_api'
 class Details extends Component {
     static navigationOptions = ({ navigation }) => {
         return {
@@ -224,7 +228,7 @@ class Details extends Component {
 			formData.append('fieldIds', item);
 			return false
         })
-        fetch(`http://139.196.123.44/datacenter_api/api/field/options`, {
+        fetch(api+`/api/field/options`, {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -249,13 +253,9 @@ class Details extends Component {
 	popoverNav=(key)=>{
         const {searchList,tokenName,menuId}=this.state
         if(key===1){
-            this.props.linkDrawer(searchList,tokenName)
+            this.handleSubmit()
         }else if(key===2){
-            this.props.navigation.navigate('Details',{
-                menuId,
-                tokenName,
-                title:'创建'
-            })
+
         }else if(key===3){
             this.props.navigation.navigate('Home')
         }else if(key===4){
@@ -263,7 +263,7 @@ class Details extends Component {
         }else if(key===5){
             this.props.navigation.navigate('User')
         }
-        this.setState({visible: false});
+        this.setState({visiblePop: false});
 	}
 	addList = (index, data) => {
 		let {itemList,optionsMap} = this.state
@@ -340,8 +340,8 @@ class Details extends Component {
 			arr.push(list)
 			return false
 		})
-		if(needList.fields) { //有fields,说明添加了1次以上
-			const field = needList.fields
+		const field = needList.fields
+		if(field && field.length>0) { //有field,说明添加了1次以上
 			field.push(...arr)
 			list["fields"] = field
 		} else {
@@ -371,6 +371,135 @@ class Details extends Component {
 			})
 		}
 	}
+	showAlert = (deleteCode) => {
+		Alert('删除操作', '确认删除这条记录吗???', [
+			{text: '取消'},
+			{text: '确认',onPress: () => this.deleteList(deleteCode)},
+		]);
+	};	
+	deleteList = (deleteCode) => {
+		let {itemList} = this.state
+		itemList.map((item) => {
+			//if(item.composite) {
+				item.fields = item.fields.filter((it) => it.fieldName.indexOf(deleteCode) === -1)
+			//}
+			return false
+		})
+		this.setState({
+			itemList
+		})
+	}
+	handleSubmit = () => {
+		const {code,totalNameArr,tokenName,menuId} = this.state //整个记录的code
+		this.props.form.validateFields({force: true}, (err, values) => { //提交再次验证
+			console.log(values)
+			for(let k in values) {
+				//name去除图片
+				if(values[k] && typeof values[k] === "object" && !Array.isArray(values[k]) && !values[k].name) {
+					values[k] = Units.dateToString(values[k])
+				} else if(values[k] && typeof values[k] === "object" && Array.isArray(values[k])) {
+					const totalName = k
+					values[`${totalName}.$$flag$$`] = true
+					values[k].map((item, index) => {
+						for(let e in item) {
+							if(e === "关系") {
+								e = "$$label$$"
+								values[`${totalName}[${index}].${e}`] = item["关系"]
+							} else if(e.indexOf("code") > -1) {
+								if(item[e]) {
+									values[`${totalName}[${index}].唯一编码`] = item[e]
+								} else {
+									delete item[e]
+								}
+							} else if(item[e] === undefined) {
+								delete item[e] //删除未更改的图片数据
+							} else {
+								values[`${totalName}[${index}].${e}`] = item[e]
+							}
+						}
+						return false
+					})
+					delete values[k] //删除原始的对象数据
+				} else if(values[k] === undefined) {
+					delete values[k] //删除未更改的图片数据(基本信息)
+				}
+			}
+			totalNameArr.map((item) => {
+				values[`${item}.$$flag$$`] = true
+				return false
+			})
+			console.log(values)
+			if(!err) {
+				const formData = new FormData();
+				if(code){
+					formData.append('唯一编码', code);
+				}
+				for(let k in values) {
+					if(values[k]){
+						console.log(values[k])
+						formData.append(k, values[k])
+					}
+				}
+				// fetch(api+`/api/entity/curd/update/${menuId}`, {
+				// 	method: 'POST',
+				// 	headers: {
+				// 		'Accept': 'application/json',
+				// 		"datamobile-token": tokenName,
+				// 		'Content-Type': 'multipart/form-data',
+				// 	},
+				// 	processData: false,
+				// 	//contentType: false,
+				// 	body: formData,
+				// }).then((response)=> {
+				// 	console.log(response)
+				// 	return response.json()
+				// }).then((data)=> {
+				// 	console.log(data)
+				// 	this.setState({
+				// 		visiblePop: false
+				// 	})
+				// 	if(data.status==='suc'){
+				// 		Toast.info("保存成功！")
+				// 		this.props.navigation.goBack()
+				// 	}else{
+				// 		Toast.fail(data.status)
+				// 	}
+				// }).catch((e)=> {
+				// 	Toast.fail(e)
+				// });
+				superagent
+					.post(api+`/api/entity/curd/update/${menuId}`)
+					.set({
+						"datamobile-token": tokenName
+					})
+					.send(formData)
+					.end((req, res) => {
+						console.log(res)
+						this.setState({
+							visible: false
+						});
+						if(res.status === 200) {
+							if(res.body.status === "suc") {
+								Toast.info("保存成功！")
+								this.props.navigation.goBack()
+							} else {
+								Toast.fail(res.body.status)
+							}
+						} else if(res.status === 403) {
+							Toast.info("请求权限不足,可能是token已经超时")
+							this.props.navigation.navigate('Login')
+						} else if(res.status === 404 || res.status === 504) {
+							Toast.info("服务器未开···")
+						} else if(res.status === 500) {
+							Toast.info("后台处理错误。")
+						}
+					})
+			} else {
+				this.setState({visiblePop: false});
+				Toast.fail("必填选项未填！！")
+			}
+		})
+	}
     render(){
         const {itemList,tokenName,visibleNav,scrollIds,optionsMap,visiblePop,menuId} = this.state
         const {getFieldProps} = this.props.form;
@@ -390,10 +519,10 @@ class Details extends Component {
 					isVisible={visiblePop}>
 					<View>
 						<Text key={1} style={styles.Text} onPress={()=>this.popoverNav(1)}>
-							<SimpleLineIcons name={"magnifier"} size={16}/>&nbsp;&nbsp;筛选
+							<Feather name={"save"} size={16}/>&nbsp;&nbsp;保存
 						</Text>
 						<Text key={2} style={styles.Text} onPress={()=>this.popoverNav(2)}>
-							<SimpleLineIcons name={"plus"} size={16}/>&nbsp;&nbsp;创建
+							<Feather name={"navigation"} size={16}/>&nbsp;&nbsp;导航
 						</Text>
 						<Text key={3} style={styles.Text} onPress={()=>this.popoverNav(3)}>
 							<SimpleLineIcons name={"home"} size={16}/>&nbsp;&nbsp;首页
@@ -436,7 +565,7 @@ class Details extends Component {
                                                 getFieldProps = {getFieldProps}
                                                 optionKey = {it.optionKey}
                                                 optionsMap = {optionsMap}
-												deleteList = {(e) => this.showAlert(it.deleteCode, e)}
+												deleteList = {() => this.showAlert(it.deleteCode)}
 												tokenName={tokenName}
 												index={index}
                                                 />
@@ -445,6 +574,7 @@ class Details extends Component {
                                 </List>
                     })
                     } 
+					{itemList.length>0?<Text style={{textAlign:'center',marginTop:20}}>到底了...</Text>:<ActivityIndicator text="加载中..."/>}
                     </View>
                 </ScrollView> 
 			</TemplateDrawer>
