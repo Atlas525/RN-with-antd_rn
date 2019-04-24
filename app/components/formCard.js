@@ -83,7 +83,7 @@ export default class FormCard extends Component {
 				return <DatePicker   
                             extra="请选择(可选)"
                             mode="date"
-                            title={`请选择${title}`}
+                            title={title}
                             key={fieldId}
                             {...getFieldProps(fieldName,{
                                 initialValue:time_date,

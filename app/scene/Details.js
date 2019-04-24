@@ -6,10 +6,9 @@ import Super from './../super'
 import TemplateDrawer from './../components/TemplateDrawer'
 import { createForm } from 'rc-form';
 import FormCard from './../components/FormCard'
-import { List,Toast,Modal,ActivityIndicator } from 'antd-mobile-rn';
+import { List,Toast,Modal,ActivityIndicator,Button } from 'antd-mobile-rn';
 import {StyleSheet ,Text, ScrollView,View } from 'react-native'
 import Popover,{ Rect } from 'react-native-popover-view'
-import superagent from 'superagent'
 const Alert = Modal.alert;
 
 const rect=new Rect(290, 0, 220, 40)
@@ -255,7 +254,7 @@ class Details extends Component {
         if(key===1){
             this.handleSubmit()
         }else if(key===2){
-
+			this.showNavModal()
         }else if(key===3){
             this.props.navigation.navigate('Home')
         }else if(key===4){
@@ -392,7 +391,6 @@ class Details extends Component {
 	handleSubmit = () => {
 		const {code,totalNameArr,tokenName,menuId} = this.state //整个记录的code
 		this.props.form.validateFields({force: true}, (err, values) => { //提交再次验证
-			console.log(values)
 			for(let k in values) {
 				//name去除图片
 				if(values[k] && typeof values[k] === "object" && !Array.isArray(values[k]) && !values[k].name) {
@@ -428,7 +426,7 @@ class Details extends Component {
 				values[`${item}.$$flag$$`] = true
 				return false
 			})
-			console.log(values)
+			//console.log(values)
 			if(!err) {
 				const formData = new FormData();
 				if(code){
@@ -440,64 +438,53 @@ class Details extends Component {
 						formData.append(k, values[k])
 					}
 				}
-				// fetch(api+`/api/entity/curd/update/${menuId}`, {
-				// 	method: 'POST',
-				// 	headers: {
-				// 		'Accept': 'application/json',
-				// 		"datamobile-token": tokenName,
-				// 		'Content-Type': 'multipart/form-data',
-				// 	},
-				// 	processData: false,
-				// 	//contentType: false,
-				// 	body: formData,
-				// }).then((response)=> {
-				// 	console.log(response)
-				// 	return response.json()
-				// }).then((data)=> {
-				// 	console.log(data)
-				// 	this.setState({
-				// 		visiblePop: false
-				// 	})
-				// 	if(data.status==='suc'){
-				// 		Toast.info("保存成功！")
-				// 		this.props.navigation.goBack()
-				// 	}else{
-				// 		Toast.fail(data.status)
-				// 	}
-				// }).catch((e)=> {
-				// 	Toast.fail(e)
-				// });
-				superagent
-					.post(api+`/api/entity/curd/update/${menuId}`)
-					.set({
-						"datamobile-token": tokenName
+				fetch(api+`/api/entity/curd/update/${menuId}`, {
+					method: 'POST',
+					headers: {
+						'Accept': 'application/json',
+						"datamobile-token": tokenName,
+						//'Content-Type': 'multipart/form-data',
+					},
+					processData: false,
+					contentType: false,
+					body: formData,
+				}).then((response)=> {
+					console.log(response)
+					return response.json()
+				}).then((data)=> {
+					console.log(data)
+					this.setState({
+						visiblePop: false
 					})
-					.send(formData)
-					.end((req, res) => {
-						console.log(res)
-						this.setState({
-							visible: false
-						});
-						if(res.status === 200) {
-							if(res.body.status === "suc") {
-								Toast.info("保存成功！")
-								this.props.navigation.goBack()
-							} else {
-								Toast.fail(res.body.status)
-							}
-						} else if(res.status === 403) {
-							Toast.info("请求权限不足,可能是token已经超时")
-							this.props.navigation.navigate('Login')
-						} else if(res.status === 404 || res.status === 504) {
-							Toast.info("服务器未开···")
-						} else if(res.status === 500) {
-							Toast.info("后台处理错误。")
-						}
-					})
+					if(data.status==='suc'){
+						Toast.info("保存成功！")
+						this.props.navigation.goBack()
+					}else{
+						Toast.fail(data.status)
+					}
+				}).catch((e)=> {
+					Toast.fail(e)
+				});
 			} else {
 				this.setState({visiblePop: false});
 				Toast.fail("必填选项未填！！")
 			}
+		})
+	}
+	showNavModal = () => {
+		this.setState({
+			visibleNav: true
+		})
+	}
+	onClose = () => {
+		this.setState({
+			visibleNav: false
+		})
+	}
+	scrollToAnchor = (i) => { //导航
+		this.myScrollView.scrollTo({ x:0, y: this[`layoutY`+i], animated: true});
+		this.setState({
+			visibleNav: false
 		})
 	}
     render(){
@@ -510,7 +497,7 @@ class Details extends Component {
 				loadTemplate = {this.loadTemplate}
 				tokenName={tokenName}
 				>
-				<ScrollView>
+				<ScrollView ref={(view) => { this.myScrollView = view; }}>
 				<Popover
 					fromRect={rect}
 					onClose={()=>this.setState({visiblePop: false})}
@@ -537,9 +524,9 @@ class Details extends Component {
 				</Popover>
                 <View>
                     {itemList.map((item, i) => {
-                        return <List
-                                    id = {item.title}	
+                        return <List	
 									key = {`${item.id}[${i}]`}
+									onLayout={e=>this[`layoutY`+i] = e.nativeEvent.layout.y}
                                     renderHeader = {() =><View style={styles.listHeader}>
                                                             <Text style={styles.listHeaderText}>{item.title}</Text>
                                                             {item.composite ?
@@ -577,6 +564,23 @@ class Details extends Component {
 					{itemList.length>0?<Text style={{textAlign:'center',marginTop:20}}>到底了...</Text>:<ActivityIndicator text="加载中..."/>}
                     </View>
                 </ScrollView> 
+				<Modal
+					popup
+					title={<Text>dsfds</Text>}
+					visible = {visibleNav}
+					onPressIn = {()=>console.log(99)}
+					animationType = "slide-up" >
+					<List renderHeader = {() => <Text style={styles.navHeaderText}> 请选择 </Text>}> 
+						{scrollIds.map((i, index) => ( 
+							<List.Item style={styles.navList} key={index} onPressIn={()=>this.scrollToAnchor(index)}> 
+								<Text>{i}</Text>
+							</List.Item>))
+						} 
+						<List.Item>
+							<Button onPressIn = {this.onClose} > 取消 </Button> 
+						</List.Item> 
+					</List> 
+				</Modal> 
 			</TemplateDrawer>
             
         )
@@ -590,15 +594,15 @@ const styles = StyleSheet.create({
     },
     headerLeft:{
         color:'#fff',
-        marginLeft:18
+        marginLeft:18,
     },
     listHeader:{
-        height:60,
+        height:50,
         backgroundColor:'#F5F5F9',
         flexDirection:'row',
         alignItems:'center',
         flex: 1,
-		paddingHorizontal: 15,
+		paddingHorizontal: 12,
 		borderWidth:0,
     },
     listHeaderText:{
@@ -614,5 +618,16 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         lineHeight:40,
         fontSize: 18
-    },
+	},
+	navList:{
+		height:40,
+		borderBottomWidth:1,
+		borderColor:'#F5F5F9',
+	},
+	navHeaderText:{
+		height:40,
+		paddingVertical: 10,
+		textAlign:'center',
+        backgroundColor:'#F5F5F9',
+	}
 })

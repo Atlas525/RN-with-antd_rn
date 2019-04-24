@@ -142,11 +142,11 @@ export default class TemplateDrawer extends Component {
 		const drawerData = templateData.entities
 		const totalPage = pageInfo ? Math.ceil(pageInfo.count / pageInfo.pageSize) : null
 		let sidebar = (<View>
-                        <View>
-                            <Text>{pageInfo?`第${pageInfo.pageNo}页，共${pageInfo.count}条`:null}</Text>
-                            <Button type="warning" inline size="small" onPressIn={this.close}>取消</Button>
-                            <Button type="primary" inline size="small" onPressIn={this.handleDrawerOk}>确定</Button>
-                        </View>
+							<Text>{pageInfo?`第${pageInfo.pageNo}页，共${pageInfo.count}条`:null}</Text>
+							<View style={styles.btns}>
+								<Button type="warning" inline size="small" onPressIn={this.close}>取消</Button>
+								<Button type="primary" inline size="small" onPressIn={this.handleDrawerOk}>确定</Button>
+							</View>
                         {
                             drawerData?drawerData.map((item,index)=>{
                                 return  <List key={item.code}>
@@ -174,10 +174,17 @@ export default class TemplateDrawer extends Component {
                 position="right"
                 touch={false}
                 enableDragHandle
-                onOpenChange={this.onOpenChange}
+				onOpenChange={this.onOpenChange}
+				drawerBackgroundColor="#fff"
             >
 				{this.props.children}
 			</Drawer>
 		)
 	}
 }
+const styles = StyleSheet.create({ 
+	btns:{
+		flexDirection: 'row',
+		justifyContent: 'center'
+	}
+})

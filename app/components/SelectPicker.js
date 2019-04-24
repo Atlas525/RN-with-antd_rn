@@ -24,7 +24,7 @@ export default class SelectPicker extends Component {
 		return(
                 <Picker                                      
                     data={optdata}
-                    title={`请选择${title}`}
+                    title={title}
 					itemStyle={{marginVertical:5}}
 					cols={1}
                     disabled={disabled}
