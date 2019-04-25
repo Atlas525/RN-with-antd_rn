@@ -114,7 +114,6 @@ export default class TemplateDrawer extends Component {
 				checkboxdata.push(value)
 			}
 		}
-		console.log(checkboxdata)
 		this.setState({
 			checkboxdata,
 		})
@@ -135,56 +134,58 @@ export default class TemplateDrawer extends Component {
 				showDrawer: true,
 				pageInfo: res.pageInfo
 			})
+			this.templateDrawer.scrollTo({ x:0, y: this.templateY, animated: true});
 		})
 	}
 	render() {
 		const {showDrawer,pageInfo,templateData} = this.state
 		const drawerData = templateData.entities
 		const totalPage = pageInfo ? Math.ceil(pageInfo.count / pageInfo.pageSize) : null
-		let sidebar = (<View>
-							<Text>{pageInfo?`第${pageInfo.pageNo}页，共${pageInfo.count}条`:null}</Text>
+		let sidebar = (<ScrollView ref={(view) => { this.templateDrawer = view; }}>							
 							<View style={styles.btns}>
-								<Button type="warning" inline size="small" onPressIn={this.close}>取消</Button>
-								<Button type="primary" inline size="small" onPressIn={this.handleDrawerOk}>确定</Button>
+								<Text onLayout={e=>this.templateY = e.nativeEvent.layout.y}>
+									{pageInfo?`第${pageInfo.pageNo}页，共${pageInfo.count}条`:null}
+								</Text>
+								<Button type="warning" size="small" style={styles.btn} onPressIn={this.close}>取消</Button>
+								<Button type="primary" size="small" style={styles.btn} onPressIn={this.handleDrawerOk}>确定</Button>
 							</View>
-                        {
-                            drawerData?drawerData.map((item,index)=>{
+                        {drawerData?drawerData.map((item,index)=>{
                                 return  <List key={item.code}>
-                                            <CheckboxItem 
-                                            onChange={() => this.changeCheckbox(item.code)}
-                                            >
-                                            {
-                                                item.fields.map((it)=>{
-                                                    return <List.Item.Brief inline key={it.id}>{it.title}&nbsp;:&nbsp;{it.value}</List.Item.Brief>                                              
-                                                })
-                                            }
+                                            <CheckboxItem onChange={() => this.changeCheckbox(item.code)}>
+                                            {item.fields.map((it)=>{
+                                                return <List.Item.Brief key={it.id}>{it.title}&nbsp;:&nbsp;{it.value}</List.Item.Brief>                                              
+                                            })}
                                             </CheckboxItem>
                                         </List>
-                            }):null
-                        }
+                            }):null}
                         {pageInfo&&totalPage>=(pageInfo.pageNo+1)?
-                        <Button onPress={()=>this.goPage(+1)}>点击加载下一页</Button>:
+                        <Button onPressIn={()=>this.goPage(+1)}>点击加载下一页</Button>:
                         <Text>没有更多了···</Text>}
-                    </View>)
-		return(
-			<Drawer
-                contentStyle={{ color: '#A6A6A6', textAlign: 'center', paddingTop: 42 }}
-                sidebar={sidebar}
-                open={showDrawer}
-                position="right"
-                touch={false}
-                enableDragHandle
-				onOpenChange={this.onOpenChange}
-				drawerBackgroundColor="#fff"
-            >
-				{this.props.children}
-			</Drawer>
+                    </ScrollView>)
+		return(<Drawer
+					contentStyle={{ color: '#A6A6A6', textAlign: 'center', paddingTop: 42 }}
+					sidebar={sidebar}
+					open={showDrawer}
+					position="right"
+					touch={false}
+					enableDragHandle
+					onOpenChange={this.onOpenChange}
+					drawerBackgroundColor="#fff"
+				>
+					{this.props.children}
+				</Drawer>
 		)
 	}
 }
 const styles = StyleSheet.create({ 
 	btns:{
 		flexDirection: 'row',
-		justifyContent: 'center'
-	}
+		justifyContent: 'center',
+		alignItems: 'center',
+		height:30,
+	},
+	btn:{
+		width:'20%',
+		marginHorizontal:8,
+	},
 })

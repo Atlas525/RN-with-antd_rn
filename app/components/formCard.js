@@ -8,6 +8,7 @@ import SelectPicker from './SelectPicker'
 import Feather from 'react-native-vector-icons/Feather';
 const Item = List.Item
 
+const api='http://139.196.123.44/datacenter_api'
 export default class FormCard extends Component {
 
 	initFormList = () => {
@@ -141,17 +142,16 @@ export default class FormCard extends Component {
                                 />
 					}
 				}
-			} else if(formList.type === "file") {
-				const files = fieldValue ? [{
-					url: `/file-server/${fieldValue}`,
-					id: fieldId,
-				}] :null
+			}else if(formList.type === "file") {
+				const files = fieldValue ? {
+					uri: fieldValue.replace(".",api),//多了一个点
+				}:null
 				return <ImgBox 
 							formList={formList}
 							files={files}
 							{...getFieldProps(fieldName)}
 						/>                  
-			} else if(formList.type === "onlycode") {
+			}else if(formList.type === "onlycode") {
 				return <TextInput 
                             {...getFieldProps(fieldName,{
                                 initialValue:fieldValue?fieldValue:"",

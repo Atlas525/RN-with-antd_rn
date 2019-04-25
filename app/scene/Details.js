@@ -3,6 +3,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
 import Feather from 'react-native-vector-icons/Feather';
 import Super from './../super'
+import Units from './../units'
 import TemplateDrawer from './../components/TemplateDrawer'
 import { createForm } from 'rc-form';
 import FormCard from './../components/FormCard'
@@ -482,10 +483,10 @@ class Details extends Component {
 		})
 	}
 	scrollToAnchor = (i) => { //导航
-		this.myScrollView.scrollTo({ x:0, y: this[`layoutY`+i], animated: true});
 		this.setState({
 			visibleNav: false
 		})
+		this.myScrollView.scrollTo({ x:0, y: this[`layoutY`+i], animated: true});
 	}
     render(){
         const {itemList,tokenName,visibleNav,scrollIds,optionsMap,visiblePop,menuId} = this.state

@@ -31,7 +31,7 @@ class ListContent extends Component {
             tokenName
         })
     } 
-    requestList=(data)=>{
+    requestList=(data,isSearch)=>{
         const {menuId,tokenName}=this.state
         Super.super({
             url: `/api/entity/curd/list/${menuId}`,
@@ -46,13 +46,17 @@ class ListContent extends Component {
                     menuId,
                     tokenName,
                     refreshing: false,
-                    searchwords:data,
                 })
+                if(isSearch){
+                    this.setState({
+                        searchwords:data,
+                    })
+                }
             }
         })
     } 
     goPage = (no) => {
-        const {pageInfo,menuId,searchwords,tokenName} = this.state
+        const {pageInfo,searchwords} = this.state
 		let data = {}
 		const topageNo = pageInfo.pageNo + no
 		data["pageNo"] = topageNo
@@ -117,10 +121,19 @@ class ListContent extends Component {
 				Toast.fail('删除失败！')
 			}
 		})
+    }
+    listPress = (code) => {
+        const {menuId,tokenName} = this.state
+		this.props.navigation.navigate('Details',{
+            menuId,
+            tokenName,
+            title:'创建',
+            code,
+        })
 	}
     render(){
         const { navigation } = this.props;
-        const {list,visible,searchList,optArr,pageInfo} = this.state
+        const {list,visible,searchList,pageInfo} = this.state
         const totalPage = pageInfo ? Math.ceil(pageInfo.count / pageInfo.pageSize) : "";
           
         return (
@@ -130,30 +143,37 @@ class ListContent extends Component {
                         refreshing={this.state.refreshing}
                         onRefresh={this._onRefresh}/>
                 }>
-            <Popover
-                fromRect={rect}
-                onClose={()=>this.setState({visible: false})}
-                placement={'bottom'}
-                popoverStyle={{width:100}}
-                isVisible={visible}>
-                <View>
-                    <Text key={1} style={styles.Text} onPress={()=>this.popoverNav(1)}>
-                        <SimpleLineIcons name={"magnifier"} size={16}/>&nbsp;&nbsp;筛选
+                <Popover
+                    fromRect={rect}
+                    onClose={()=>this.setState({visible: false})}
+                    placement={'bottom'}
+                    popoverStyle={{width:100}}
+                    isVisible={visible}>
+                    <View>
+                        <Text key={1} style={styles.Text} onPress={()=>this.popoverNav(1)}>
+                            <SimpleLineIcons name={"magnifier"} size={16}/>&nbsp;&nbsp;筛选
+                        </Text>
+                        <Text key={2} style={styles.Text} onPress={()=>this.popoverNav(2)}>
+                            <SimpleLineIcons name={"plus"} size={16}/>&nbsp;&nbsp;创建
+                        </Text>
+                        <Text key={3} style={styles.Text} onPress={()=>this.popoverNav(3)}>
+                            <SimpleLineIcons name={"home"} size={16}/>&nbsp;&nbsp;首页
+                        </Text>
+                        <Text key={4} style={styles.Text} onPress={()=>this.popoverNav(4)}>
+                            <SimpleLineIcons name={"logout"} size={16}/>&nbsp;&nbsp;退出
+                        </Text>                    
+                        <Text key={5} style={styles.Text} onPress={()=>this.popoverNav(5)}>
+                            <SimpleLineIcons name={"user"} size={16}/>&nbsp;&nbsp;用户
+                        </Text>
+                    </View>
+                </Popover>
+                <View style={styles.nextPage}>                    
+                    <Text>
+                        {pageInfo?`第${pageInfo.pageNo}页，共${pageInfo.count}条`:null}
                     </Text>
-                    <Text key={2} style={styles.Text} onPress={()=>this.popoverNav(2)}>
-                        <SimpleLineIcons name={"plus"} size={16}/>&nbsp;&nbsp;创建
-                    </Text>
-                    <Text key={3} style={styles.Text} onPress={()=>this.popoverNav(3)}>
-                        <SimpleLineIcons name={"home"} size={16}/>&nbsp;&nbsp;首页
-                    </Text>
-                    <Text key={4} style={styles.Text} onPress={()=>this.popoverNav(4)}>
-                        <SimpleLineIcons name={"logout"} size={16}/>&nbsp;&nbsp;退出
-                    </Text>                    
-                    <Text key={5} style={styles.Text} onPress={()=>this.popoverNav(5)}>
-                        <SimpleLineIcons name={"user"} size={16}/>&nbsp;&nbsp;用户
-                    </Text>
+                    {pageInfo && pageInfo.pageNo!==1? <Button size="small" onPressIn={()=>this.goPage(-1)}>
+                    上一页</Button>:null}
                 </View>
-            </Popover>
                 {list?list.map((item,index)=>{
                     return <SwipeAction
                                 autoClose
@@ -162,8 +182,12 @@ class ListContent extends Component {
                                     text: '删除',
                                     onPress: () =>this.handelDelete(item.code),
                                     style: { backgroundColor: '#EE6363', color: 'white' },
+                                    },{
+                                    text: '详情',
+                                    onPress: () =>this.listPress(item.code),
+                                    style: { backgroundColor: '#0B79C7', color: 'white' },
                                     },]}
-                                key={item.code}
+                                 key={item.code}
                                 >
                                 <List 
                                     renderHeader={pageInfo?`${(pageInfo.pageNo-1)*pageInfo.pageSize+index+1}`:null} 
@@ -176,8 +200,8 @@ class ListContent extends Component {
                             </SwipeAction>
                 }):null}
                 {pageInfo ? <Button>
-                                {totalPage>=(pageInfo.pageNo+1)?<Text onPress={()=>this.goPage(+1)}>--点击加载下一页--</Text>:
-                                <Text>没有更多了···</Text>}
+                                {totalPage>=(pageInfo.pageNo+1)?<Text style={styles.next} onPress={()=>this.goPage(+1)}>--点击加载下一页--</Text>:
+                                <Text style={styles.next}>没有更多了···</Text>}
                             </Button>: <ActivityIndicator text="加载中..."/>} 
             </ScrollView>
         )
@@ -279,10 +303,9 @@ export default class DrawerBox extends Component {
         }       
     }
     handleSearch = (values) => {
-		this.ListContent.requestList(values)
+		this.ListContent.requestList(values,true) //true为了和页码分开
 		this.setState({
             openDrawer:false,
-			//searchwords: values
 		})
 	}
     render(){
@@ -303,6 +326,7 @@ export default class DrawerBox extends Component {
                 open={openDrawer}
                 onOpenChange={(isOpen)=>this.setState({openDrawer:isOpen})}
                 drawerBackgroundColor="#F5F5F9"
+                touch={false}
             >
                 <ListContent 
                     navigation={this.props.navigation} 
@@ -327,7 +351,16 @@ const styles = StyleSheet.create({
     headerLeft:{
         color:'#fff',
         marginLeft:18
-
+    },
+    nextPage:{
+        flexDirection:'row',
+        height:40,
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 10
+    },
+    next:{
+        fontSize:15
     }
 
 })

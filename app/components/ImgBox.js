@@ -4,20 +4,6 @@ import { List,Toast } from 'antd-mobile-rn';
 import ImagePicker from 'react-native-image-picker';
 const Item = List.Item
 
-var photoOptions = {
-    //底部弹出框选项
-    title:'请选择',
-    cancelButtonTitle:'取消',
-    takePhotoButtonTitle:'拍照',
-    chooseFromLibraryButtonTitle:'选择相册',
-    quality:0.75,
-    allowsEditing:true,
-    noData:false,
-    storageOptions: {
-        skipBackup: true,
-        path:'images'
-    }
-}
 export default class ImgBox extends Component {
 
 	state = {
@@ -38,12 +24,24 @@ export default class ImgBox extends Component {
 	}
 	showSelectImgBox=(title)=>{
 		const options = {
-			title: `选择${title}`,
+			title: `选择${title}`, 
+			cancelButtonTitle: '取消',
+			takePhotoButtonTitle: '拍照', 
+			chooseFromLibraryButtonTitle: '选择照片',
+			cameraType: 'back',
+			mediaType: 'photo',
+			videoQuality: 'high', 
+			durationLimit: 10, 
+			maxWidth: 300,
+			maxHeight: 300,
+			quality: 0.8, 
+			angle: 0,
+			allowsEditing: false, 
+			noData: false,
 			storageOptions: {
-			  skipBackup: true,
-			  path: 'images',
-			},
-		  };
+					skipBackup: true  
+			}
+	};
 		ImagePicker.showImagePicker(options, (response) => {
 			console.log('Response = ', response);
 		   
@@ -51,13 +49,11 @@ export default class ImgBox extends Component {
 			  console.log('User cancelled image picker');
 			} else if (response.error) {
 			  console.log('ImagePicker Error: ', response.error);
-			} else if (response.customButton) {
-			  console.log('User tapped custom button: ', response.customButton);
-			} else {
+			}else {
 			  const source = { uri: response.uri }
 		   
 			  this.setState({
-				files: source,
+					files: source,
 			  });
 			}
 		  });
@@ -66,9 +62,12 @@ export default class ImgBox extends Component {
 		const {formList} = this.props
 		const {files} = this.state
 		const {title,fieldId} = formList
-		
+		console.log(files)
 		return(
-			<Item extra={files?<Image source={files} />:`请选择${title}`} arrow="horizontal" onPressIn={()=>this.showSelectImgBox(title)}>
+			<Item 
+				extra={files?<Image style={{width: 50, height: 50}} source={files} />:`请选择${title}`} 
+				arrow="horizontal" 
+				onPressIn={()=>this.showSelectImgBox(title)}>
 				{title}
 			</Item>
 		)
