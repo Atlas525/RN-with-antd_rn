@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import Super from "./../super"
-import { Text,ScrollView,RefreshControl,StyleSheet,View } from 'react-native';
-import { SwipeAction,List,Button,ActivityIndicator,Toast,Drawer } from 'antd-mobile-rn'
+import { Text,ScrollView,RefreshControl,StyleSheet,View,DrawerLayoutAndroid } from 'react-native';
+import { SwipeAction,List,Button,ActivityIndicator,Toast } from 'antd-mobile-rn'
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
 import Popover,{ Rect } from 'react-native-popover-view'
 import SearchBar from './SearchBar'
@@ -255,15 +255,12 @@ export default class DrawerBox extends Component {
 		this.ListContent = ref
     }
     linkDrawer=(searchList,tokenName)=>{
-        const {openDrawer}=this.state
+        this.refs.drawerLayout.openDrawer()
         this.setState({
-            openDrawer:!openDrawer,
             searchList,
             tokenName,
         })
-        if(openDrawer===false){
-            this.getSearchOptions(searchList,tokenName)
-        }
+        this.getSearchOptions(searchList,tokenName)
     }
     getSearchOptions = (searchList,tokenName) => {
 		const searchId = []
@@ -304,12 +301,10 @@ export default class DrawerBox extends Component {
     }
     handleSearch = (values) => {
 		this.ListContent.requestList(values,true) //true为了和页码分开
-		this.setState({
-            openDrawer:false,
-		})
+        this.refs.drawerLayout.closeDrawer()
 	}
     render(){
-        const {openDrawer,searchList,optionsMap}=this.state
+        const {searchList,optionsMap}=this.state
         const sidebar = (
             <ScrollView>
                 <SearchBar 
@@ -320,20 +315,20 @@ export default class DrawerBox extends Component {
             </ScrollView>
           );
         return(
-            <Drawer
-                sidebar={sidebar}
-                position="right"
-                open={openDrawer}
-                onOpenChange={(isOpen)=>this.setState({openDrawer:isOpen})}
+            <DrawerLayoutAndroid
+                ref={'drawerLayout'}
+                renderNavigationView={() => sidebar} 
+                drawerPosition={DrawerLayoutAndroid.positions.Right}
+                drawerLockMode='locked-closed'      
                 drawerBackgroundColor="#F5F5F9"
-                touch={false}
+                keyboardDismissMode="on-drag"    
             >
                 <ListContent 
                     navigation={this.props.navigation} 
                     onRef = {this.onRef}
                     linkDrawer={this.linkDrawer}
                     />
-            </Drawer>
+            </DrawerLayoutAndroid>
         )
     }
 }

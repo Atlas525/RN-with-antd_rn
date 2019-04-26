@@ -231,16 +231,18 @@ class Details extends Component {
         fetch(api+`/api/field/options`, {
             method: 'POST',
             headers: {
-                'Accept': 'application/json',
-                "datamobile-token": tokenName
-                // 'Content-Type': 'multipart/form-data',
+                //'Accept': 'application/json',
+                "datamobile-token": tokenName,
+                'Content-Type': 'multipart/form-data',
             },
             processData: false,
             contentType: false,
             body: formData,
         }).then((response)=> {
+			console.log(response)
             return response.json();
         }).then((data)=> {
+			console.log(data)
             optionsMap=data.optionsMap
             this.reloadItemList(itemList, premises, optionsMap)
             this.setState({
@@ -389,45 +391,49 @@ class Details extends Component {
 			itemList
 		})
 	}
+	madeValue=(values)=>{
+		for(let k in values) {
+			//name去除图片
+			if(values[k] && typeof values[k] === "object" && !Array.isArray(values[k]) && !values[k].name) {
+				values[k] = Units.dateToString(values[k])
+			} else if(values[k] && typeof values[k] === "object" && Array.isArray(values[k])) {
+				const totalName = k
+				values[`${totalName}.$$flag$$`] = true
+				values[k].map((item, index) => {
+					for(let e in item) {
+						if(e === "关系") {
+							e = "$$label$$"
+							values[`${totalName}[${index}].${e}`] = item["关系"]
+						} else if(e.indexOf("code") > -1) {
+							if(item[e]) {
+								values[`${totalName}[${index}].唯一编码`] = item[e]
+							} else {
+								delete item[e]
+							}
+						} else if(item[e] === undefined) {
+							delete item[e] //删除未更改的图片数据
+						} else {
+							values[`${totalName}[${index}].${e}`] = item[e]
+						}
+					}
+					return false
+				})
+				delete values[k] //删除原始的对象数据
+			} else if(values[k] === undefined) {
+				delete values[k] //删除未更改的图片数据(基本信息)
+			}
+		}
+		return values
+	}
 	handleSubmit = () => {
 		const {code,totalNameArr,tokenName,menuId} = this.state //整个记录的code
 		this.props.form.validateFields({force: true}, (err, values) => { //提交再次验证
-			for(let k in values) {
-				//name去除图片
-				if(values[k] && typeof values[k] === "object" && !Array.isArray(values[k]) && !values[k].name) {
-					values[k] = Units.dateToString(values[k])
-				} else if(values[k] && typeof values[k] === "object" && Array.isArray(values[k])) {
-					const totalName = k
-					values[`${totalName}.$$flag$$`] = true
-					values[k].map((item, index) => {
-						for(let e in item) {
-							if(e === "关系") {
-								e = "$$label$$"
-								values[`${totalName}[${index}].${e}`] = item["关系"]
-							} else if(e.indexOf("code") > -1) {
-								if(item[e]) {
-									values[`${totalName}[${index}].唯一编码`] = item[e]
-								} else {
-									delete item[e]
-								}
-							} else if(item[e] === undefined) {
-								delete item[e] //删除未更改的图片数据
-							} else {
-								values[`${totalName}[${index}].${e}`] = item[e]
-							}
-						}
-						return false
-					})
-					delete values[k] //删除原始的对象数据
-				} else if(values[k] === undefined) {
-					delete values[k] //删除未更改的图片数据(基本信息)
-				}
-			}
+			this.madeValue(values) //处理数据
 			totalNameArr.map((item) => {
 				values[`${item}.$$flag$$`] = true
 				return false
 			})
-			//console.log(values)
+			console.log(values)
 			if(!err) {
 				const formData = new FormData();
 				if(code){
@@ -435,28 +441,22 @@ class Details extends Component {
 				}
 				for(let k in values) {
 					if(values[k]){
-						console.log(values[k])
 						formData.append(k, values[k])
 					}
 				}
 				fetch(api+`/api/entity/curd/update/${menuId}`, {
 					method: 'POST',
 					headers: {
-						'Accept': 'application/json',
+						'Content-Type': 'multipart/form-data',
 						"datamobile-token": tokenName,
-						//'Content-Type': 'multipart/form-data',
 					},
-					processData: false,
-					contentType: false,
 					body: formData,
 				}).then((response)=> {
 					console.log(response)
 					return response.json()
 				}).then((data)=> {
 					console.log(data)
-					this.setState({
-						visiblePop: false
-					})
+					this.setState({visiblePop: false})
 					if(data.status==='suc'){
 						Toast.info("保存成功！")
 						this.props.navigation.goBack()
