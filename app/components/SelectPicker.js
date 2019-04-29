@@ -20,7 +20,7 @@ export default class SelectPicker extends Component {
 	}
 	render() {
 		const {formList,disabled,optdata} = this.props
-		const {title,fieldId,value} = formList
+		const {title,value} = formList
 		return(
                 <Picker                                      
                     data={optdata}

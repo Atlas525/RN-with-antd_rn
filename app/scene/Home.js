@@ -46,14 +46,12 @@ export default class Home extends Component {
                     easing="ease-out"
                     animation={isActive ? 'fadeInDown' : null}
                     >
-                    <List style={styles.list}>
-                        {item.map((it)=>{
-                            return  <List.Item style={styles.smallList} key={it.id}  onPressIn={()=>this.toList(it.id,it.title)}>
-                                            <Text style={styles.listText}>{it.title}</Text>
-                                            <FontAwesome name={'angle-right'} style={styles.FontAwesome}  />
-                                    </List.Item>
-                        })}
-                    </List>
+                    {item.map((it)=>{
+                        return  <List.Item style={styles.smallList} key={it.id}  onPressIn={()=>this.toList(it.id,it.title)}>
+                                        <Text style={styles.listText}>{it.title}</Text>
+                                        <FontAwesome name={'angle-right'} style={styles.FontAwesome}  />
+                                </List.Item>
+                    })}
                 </Animatable.View>
     }
     toList=(menuId,title)=>{
@@ -67,24 +65,29 @@ export default class Home extends Component {
     render(){
         const {data,activeSections}=this.state
         return (
-            <ScrollView>
+            <ScrollView style={styles.homecontain}>
                 <Accordion
                     onChange={this.onChange}
                     activeSections={this.state.activeSections}>
                     {data?data.map((item)=>{
                         const id=item.id
-                        return <Accordion.Panel header={item.title} key={id} style={styles.Panel}>
-                                    {item.level2s?this.renderItem(item.level2s,activeSections===id.toString()?true:false):"" }
+                        return  <Accordion.Panel header={item.title} key={id} style={styles.Panel}>
+                                    {item.level2s?this.renderItem(item.level2s,activeSections===id.toString()?true:false):null }
                                 </Accordion.Panel>
-                        }):""}
+                        }):null}
                 </Accordion>
             </ScrollView>
         )
     }
 }
 const styles = StyleSheet.create({
+    homecontain:{
+        padding:20,
+        backgroundColor:'#F6F6FA'
+    },
     Panel:{
         height:65,
+        backgroundColor:"#fff",
     },
     list:{
         marginLeft:10,

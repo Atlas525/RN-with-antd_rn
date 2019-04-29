@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
-import { DatePicker, List, InputItem,Picker,Badge } from 'antd-mobile-rn';
-import {StyleSheet ,Text, ScrollView,View,TextInput } from 'react-native'
+import { DatePicker, List, InputItem,Badge } from 'antd-mobile-rn';
+import {StyleSheet ,Text,View,TextInput } from 'react-native'
 import ImgBox from './ImgBox'
 import CasePicker from './CasePicker'
 import MultiplePicker from './MultiplePicker'
@@ -42,16 +42,14 @@ export default class FormCard extends Component {
 			} else if(formList.type === "select" || formList.type === "relation" || formList.type === "preselect" ) {
 				if(optionsMap) {
 					let optdata
-					let opArr=[]
 					for(let k in optionsMap) {
-						if(k.indexOf(formList.fieldId) > -1) {
+						if(k.includes(formList.fieldId)===true) {
 							optdata=optionsMap[k]
 						}
 					}
 					if(optdata){
 						for(let k in optdata){
 							optdata[k]["label"]=optdata[k].title
-							opArr.push(optdata[k])
 						}
 						return <SelectPicker 
 									formList={formList}
@@ -122,20 +120,18 @@ export default class FormCard extends Component {
 			} else if(formList.type === "label") {
                 if(optionsMap) {
 					let optdata
-					let opArr=[]
 					for(let k in optionsMap) {
-						if(k.indexOf(formList.fieldId) > -1) {
+						if(k.includes(formList.fieldId)===true) {
 							optdata=optionsMap[k]
 						}
 					}
 					if(optdata){
 						for(let k in optdata){
 							optdata[k]["label"]=optdata[k].title
-							opArr.push(optdata[k])
 						}
 						return <MultiplePicker 
                                     formList={formList}
-                                    opArr={opArr}
+                                    optdata={optdata}
                                     {...getFieldProps(fieldName,{
                                         initialValue:fieldValue?fieldValue:"",
                                     })}

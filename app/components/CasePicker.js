@@ -12,7 +12,7 @@ export default class CasePicker extends Component {
 		caseModal: false,
 		caseList: "",
 		changeselset: 0,
-		radiotvalue: "",
+		stateRadioValue: "",
 		changeTag: false,
 		ikey: [],
 		tagStr: []
@@ -21,9 +21,7 @@ export default class CasePicker extends Component {
 		let caseList = formList.value
 		const optGroupId = formList.optionKey.split("@")[0]
 		const num = formList.optionKey.split("@")[1]
-		let {
-			tagStr
-		} = this.state
+		let {tagStr} = this.state
 		if(caseList) {
 			tagStr = caseList.split("->")
 			tagStr = Units.uniq(tagStr)
@@ -34,7 +32,7 @@ export default class CasePicker extends Component {
 			changeselset: 0,
 			radiokey: "",
 			num,
-			radiotvalue: "",
+			stateRadioValue: "",
 			tagStr,
 		});
 		this.getcaseList(optGroupId)
@@ -42,11 +40,9 @@ export default class CasePicker extends Component {
 
 	getcaseList = (optionKey) => {
 		const {tokenName} =this.props
-		let {
-			ikey
-		} = this.state
+		let {ikey} = this.state
 		if(typeof optionKey === "string") {
-			ikey.push(parseInt(optionKey))
+			ikey.push(Number.parseInt(optionKey))
 			this.setState({
 				ikey
 			})
@@ -68,12 +64,9 @@ export default class CasePicker extends Component {
 			})
 		})
 	}
-	onChangeTag = (selected, index, radiokey) => {
-		let {
-			radiotvalue,
-			ikey
-		} = this.state
-		const arr = radiotvalue.split("->")
+	onChangeTag = (index, radiokey) => {
+		let {stateRadioValue,ikey} = this.state
+		const arr = stateRadioValue.split("->")
 		const arr2 = []
 		const keys = []
 		let res = ""
@@ -90,36 +83,30 @@ export default class CasePicker extends Component {
 		this.setState({
 			changeselset: index,
 			changeTag: true,
-			radiotvalue: res,
+			stateRadioValue: res,
 			ikey: keys
 		})
 	}
 	onRadioChange = (radiokey, radiovalue) => {
-		let {
-			caseList,
-			radiotvalue,
-			num,
-			changeselset,
-			ikey,
-			tagStr
-		} = this.state
+		let {caseList,stateRadioValue,num,changeselset,ikey,tagStr} = this.state
 		let changenum = changeselset
-		if(radiotvalue) {
-			if(tagStr.length === parseInt(num)) {
-				const arr = radiotvalue.split("->")
+		const Num=Number.parseInt(num)
+		if(stateRadioValue) {
+			if(tagStr.length === Num) {
+				const arr = stateRadioValue.split("->")
 				arr.splice(num - 1, 1, radiovalue)
-				radiotvalue = arr.join("->")
-				caseList = radiotvalue
+				stateRadioValue = arr.join("->")
+				caseList = stateRadioValue
 				ikey.push(radiokey)
 			} else {
-				caseList = radiotvalue + "->" + radiovalue
-				radiotvalue = radiotvalue + "->" + radiovalue
+				caseList = stateRadioValue + "->" + radiovalue
+				stateRadioValue = stateRadioValue + "->" + radiovalue
 				ikey.push(radiokey)
 				changenum++
 			}
 		} else {
 			caseList = radiovalue
-			radiotvalue = radiovalue
+			stateRadioValue = radiovalue
 			ikey.push(radiokey)
 			changenum++
 		}
@@ -127,15 +114,15 @@ export default class CasePicker extends Component {
 			tagStr = caseList.split("->")
 			tagStr = Units.uniq(tagStr)
 		}
-		if(radiotvalue.split("->").length < parseInt(num)) {
+		if(stateRadioValue.split("->").length < Num) {
 			this.getcaseList(radiokey)
-		} else if(radiotvalue.split("->").length === parseInt(num)) {
-			ikey.splice(parseInt(num), 1, radiokey)
+		} else if(stateRadioValue.split("->").length === Num) {
+			ikey.splice(Num, 1, radiokey)
 		}
 		ikey = Units.uniq(ikey)
 		this.setState({
 			radiokey,
-			radiotvalue,
+			stateRadioValue,
 			caseList,
 			changeselset: changenum,
 			ikey,
@@ -156,7 +143,7 @@ export default class CasePicker extends Component {
 		this.setState({
 			caseList: "",
 			changeselset: 0,
-			radiotvalue: "",
+			stateRadioValue: "",
 			changeTag: false,
 			ikey: [],
 			tagStr: []

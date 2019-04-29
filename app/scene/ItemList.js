@@ -46,12 +46,8 @@ class ListContent extends Component {
                     menuId,
                     tokenName,
                     refreshing: false,
+                    searchwords:isSearch?data:''
                 })
-                if(isSearch){
-                    this.setState({
-                        searchwords:data,
-                    })
-                }
             }
         })
     } 
@@ -122,18 +118,17 @@ class ListContent extends Component {
 			}
 		})
     }
-    listPress = (code) => {
+    listPress = (code,title) => {
         const {menuId,tokenName} = this.state
 		this.props.navigation.navigate('Details',{
             menuId,
             tokenName,
-            title:'创建',
+            title,
             code,
         })
 	}
     render(){
-        const { navigation } = this.props;
-        const {list,visible,searchList,pageInfo} = this.state
+        const {list,visible,pageInfo} = this.state
         const totalPage = pageInfo ? Math.ceil(pageInfo.count / pageInfo.pageSize) : "";
           
         return (
@@ -184,7 +179,7 @@ class ListContent extends Component {
                                     style: { backgroundColor: '#EE6363', color: 'white' },
                                     },{
                                     text: '详情',
-                                    onPress: () =>this.listPress(item.code),
+                                    onPress: () =>this.listPress(item.code,item.title),
                                     style: { backgroundColor: '#0B79C7', color: 'white' },
                                     },]}
                                  key={item.code}
@@ -221,12 +216,12 @@ export default class DrawerBox extends Component {
                 },
                 headerLeft: (
                     <View>
-                    <SimpleLineIcons
-                        name={'arrow-left'} 
-                        size={20} 
-                        style={styles.headerLeft}  
-                        onPress={navigation.getParam('goBack')}/>
-                        </View>
+                        <SimpleLineIcons
+                            name={'arrow-left'} 
+                            size={20} 
+                            style={styles.headerLeft}  
+                            onPress={navigation.getParam('goBack')}/>
+                    </View>
                   ),
                 headerRight: (
                     <View>
@@ -304,13 +299,14 @@ export default class DrawerBox extends Component {
         this.refs.drawerLayout.closeDrawer()
 	}
     render(){
-        const {searchList,optionsMap}=this.state
+        const {searchList,optionsMap,tokenName}=this.state
         const sidebar = (
             <ScrollView>
                 <SearchBar 
                     navigation={this.props.navigation} 
                     searchList={searchList} 
                     optionsMap={optionsMap} 
+                    tokenName={tokenName}
                     handleSearch={this.handleSearch}/>
             </ScrollView>
           );
@@ -319,7 +315,7 @@ export default class DrawerBox extends Component {
                 ref={'drawerLayout'}
                 renderNavigationView={() => sidebar} 
                 drawerPosition={DrawerLayoutAndroid.positions.Right}
-                drawerLockMode='locked-closed'      
+                drawerLockMode='locked-closed' 
                 drawerBackgroundColor="#F5F5F9"
                 keyboardDismissMode="on-drag"    
             >

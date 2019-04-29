@@ -62,7 +62,6 @@ export default class ImgBox extends Component {
 		const {formList} = this.props
 		const {files} = this.state
 		const {title,fieldId} = formList
-		console.log(files)
 		return(
 			<Item 
 				extra={files?<Image style={{width: 50, height: 50}} source={files} />:`请选择${title}`} 

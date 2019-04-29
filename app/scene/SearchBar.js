@@ -30,7 +30,7 @@ class SearchForm extends Component {
 	}
     render(){
         const {getFieldProps} = this.props.form;
-        const {searchList,optionsMap} = this.props
+        const {searchList,optionsMap,tokenName} = this.props
         //console.log(searchList)
         return (
             <ScrollView>
@@ -39,6 +39,7 @@ class SearchForm extends Component {
                         return  <SearchCard 
                                     key={item.id} 
                                     formList={item}
+                                    tokenName={tokenName}
                                     optionsMap={optionsMap}
                                     getFieldProps={getFieldProps}
                                 />

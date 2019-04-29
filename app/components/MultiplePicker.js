@@ -10,16 +10,12 @@ export default class MultiplePicker extends Component {
 		vismodal: false,
 	}
 	showModal =() => {
-		const {opArr,formList} = this.props
-		const {fieldId,value} = formList
-		let optdata = []
-		if(opArr && opArr.length > 0) {
-			opArr.map((item) => {
-				item["checked"] = false
-				return false
-			})
-		}
-		optdata=opArr
+		const {optdata,formList} = this.props
+		const {value} = formList
+		optdata.map((item) => {
+			item["checked"] = false
+			return false
+		})
 		if(value) {
 			const arrvalue = value.split(",")
 			optdata.map((item) => {
@@ -79,7 +75,7 @@ export default class MultiplePicker extends Component {
 	render() {
 		const {formList} = this.props
 		const {optdata,vismodal} = this.state
-		const {title,fieldId,value} = formList
+		const {title,value} = formList
 		return(
 			<View>
 				<Item extra={value?value:`请选择${title}`} arrow="horizontal" onPressIn={this.showModal}>
@@ -104,7 +100,7 @@ export default class MultiplePicker extends Component {
                                     >
                                     {i.label}
                                 </CheckboxItem>
-                            )):""}
+                            )):null}
                         </View>
                         <List.Item>
                             <Button type="primary" onClick={this.onCloseMul}>确定</Button>

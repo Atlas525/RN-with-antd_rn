@@ -73,7 +73,7 @@ class Details extends Component {
         this.props.navigation.navigate('ItemList')
     }
     loadRequest = () => {
-        const {menuId, code,tokenName}=this.state
+		const {menuId, code,tokenName}=this.state
 		const URL = code ? `/api/entity/curd/detail/${menuId}/${code}` : `/api/entity/curd/dtmpl/${menuId}`
 		Super.super({
 			url: URL,
@@ -253,7 +253,6 @@ class Details extends Component {
         });
 	}
 	popoverNav=(key)=>{
-        const {searchList,tokenName,menuId}=this.state
         if(key===1){
             this.handleSubmit()
         }else if(key===2){
@@ -383,7 +382,7 @@ class Details extends Component {
 		let {itemList} = this.state
 		itemList.map((item) => {
 			//if(item.composite) {
-				item.fields = item.fields.filter((it) => it.fieldName.indexOf(deleteCode) === -1)
+				item.fields = item.fields.filter((it) => it.fieldName.includes(deleteCode) === false)
 			//}
 			return false
 		})
@@ -404,7 +403,7 @@ class Details extends Component {
 						if(e === "关系") {
 							e = "$$label$$"
 							values[`${totalName}[${index}].${e}`] = item["关系"]
-						} else if(e.indexOf("code") > -1) {
+						} else if(e.includes("code") ===true ) {
 							if(item[e]) {
 								values[`${totalName}[${index}].唯一编码`] = item[e]
 							} else {
