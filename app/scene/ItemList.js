@@ -53,10 +53,11 @@ class ListContent extends Component {
     } 
     goPage = (no) => {
         const {pageInfo,searchwords} = this.state
-		let data = {}
 		const topageNo = pageInfo.pageNo + no
-		data["pageNo"] = topageNo
-		data["pageSize"] = pageInfo.pageSize
+		let data = {
+            pageNo:topageNo,
+            pageSize:pageInfo.pageSize
+        }
 		for(let k in searchwords) {
 			if(searchwords[k]) {
 				data[k] = searchwords[k]

@@ -42,7 +42,7 @@ export default class CasePicker extends Component {
 		const {tokenName} =this.props
 		let {ikey} = this.state
 		if(typeof optionKey === "string") {
-			ikey.push(Number.parseInt(optionKey))
+			ikey.push(parseInt(optionKey))
 			this.setState({
 				ikey
 			})
@@ -52,10 +52,11 @@ export default class CasePicker extends Component {
 		},tokenName).then((res) => {
 			const ops = []
 			res.options.map((item) => {
-				const op = {}
-				op["value"] = item.title
-				op["label"] = item.title
-				op["key"] = item.id
+				const op = {
+					value:item.title,
+					label:item.title,
+					key:item.id
+				}
 				ops.push(op)
 				return false
 			})
@@ -94,7 +95,7 @@ export default class CasePicker extends Component {
 		if(stateRadioValue) {
 			if(tagStr.length === Num) {
 				const arr = stateRadioValue.split("->")
-				arr.splice(num - 1, 1, radiovalue)
+				arr.splice(Num - 1, 1, radiovalue)
 				stateRadioValue = arr.join("->")
 				caseList = stateRadioValue
 				ikey.push(radiokey)
@@ -131,12 +132,8 @@ export default class CasePicker extends Component {
 		});
 	};
 	onCloseCase = () => {
-		let {
-			caseList
-		} = this.state
-		let {
-			formList
-		} = this.props
+		let {caseList} = this.state
+		let {formList} = this.props
 		formList.value = caseList //最后按确定键，将值传出
 		this.triggerChange(caseList);
 		this.onClose()
@@ -183,7 +180,7 @@ export default class CasePicker extends Component {
                             {tagStr.map((item,index)=>(
                                 <Tag 
                                     selected={changeTag?(index===changeselset?true:false):false} //判断点击是否为当前
-                                    onChange={(selected) =>this.onChangeTag(selected, index,ikey[index])} 
+                                    onChange={() =>this.onChangeTag(index,ikey[index])} 
                                     key={index}
 									disabled={index>changeselset?true:false}
 									style={styles.tag}

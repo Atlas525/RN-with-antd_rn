@@ -120,19 +120,21 @@ class Details extends Component {
 		if(premises && premises.length > 0) { //判断有无不可修改字段
 			const result = []
 			let re = []
-			premises.map((item) => {
-				let list = {}
-				let li = {}
-				let fields = []
-				list["id"] = item.id
-				list["title"] = "不可修改字段"
-				li["title"] = item["fieldTitle"]
-				li["type"] = "text"
-				li["value"] = item["fieldValue"]
-				li["available"] = false
-				li["fieldName"] = item["fieldTitle"]
+			premises.map((item) => {				
+				let li = {
+					title: item.fieldTitle,
+					type:"text",
+					value:item.fieldValue,
+					available: false,
+					fieldName:item.fieldTitle,
+				}
+				const fields = []
 				fields.push(li)
-				list["fields"] = fields
+				let list = {
+					id:item.id,
+					title:"不可修改字段",
+					fields:fields
+				}
 				result.push(list)
 				re = fields
 				return false
@@ -163,38 +165,41 @@ class Details extends Component {
 						item["i"] = index //加入计数array条数
 						const totname = item.composite.name
 						//删除按钮                                              
-						const deletebtn = {}
-						deletebtn["type"] = "deletebtn"
-						deletebtn["deleteCode"] = `${totname}[${index}]`
-						deletebtn["fieldName"] = `${totname}[${index}].deleteCode`
+						const deletebtn = {
+							type:"deletebtn",
+							deleteCode:`${totname}[${index}]`,
+							fieldName:`${totname}[${index}].deleteCode`,
+						}
 						re.push(deletebtn)
 						//关系选项
 						if(item.composite.addType === 5) {
-							const relation = {}
 							const relaOptions = []
 							item.composite.relationSubdomain.map((item) => {
-								const list = {}
-								list["title"] = item
-								list["value"] = item
-								list["label"] = item
+								const list = {
+									title:item,
+									value:item,
+									label:item
+								}
 								relaOptions.push(list)
 								return false
 							})
-							relation["fieldId"] = item.composite.id
-							relation["type"] = "relation"
-							relation["value"] = it.relation
-							relation["title"] = "关系"
-							relation["validators"] = "required"
-							relation["fieldName"] = `${totname}[${index}].关系`
-							relation["relationSubdomain"] = relaOptions
-							optionsMap[`field_${item.composite.id}`] = relaOptions
+							const relation = {
+								fieldId:item.composite.id,
+								type:"relation",
+								value:it.relation,
+								title:"关系",
+								validators:"required",
+								fieldName:`${totname}[${index}].关系`,
+								relationSubdomain:relaOptions
+							}
 							re.push(relation)
 						}
 						//唯一编码
-						const onlycode = {}
-						onlycode["type"] = "onlycode"
-						onlycode["fieldName"] = `${totname}[${index}].code`
-						onlycode["value"] = it.code
+						const onlycode = {
+							type:"onlycode",
+							fieldName:`${totname}[${index}].code`,
+							value:it.code
+						}
 						re.push(onlycode)
 						//列表数据                             
 						it.fields.map((e) => {
@@ -239,10 +244,10 @@ class Details extends Component {
             contentType: false,
             body: formData,
         }).then((response)=> {
-			console.log(response)
+			//console.log(response)
             return response.json();
         }).then((data)=> {
-			console.log(data)
+			//console.log(data)
             optionsMap=data.optionsMap
             this.reloadItemList(itemList, premises, optionsMap)
             this.setState({
@@ -273,50 +278,51 @@ class Details extends Component {
 		const descs = []
 		const totalNm = needList.composite.name
 		//删除按钮                                              
-		const deletebtn = {}
-		deletebtn["type"] = "deletebtn"
-		deletebtn["deleteCode"] = `${totalNm}[${i}]`
-		deletebtn["fieldName"] = `${totalNm}[${i}].deleteCode`
+		const deletebtn = {
+			type:"deletebtn",
+			deleteCode:`${totalNm}[${i}]`,
+			fieldName: `${totalNm}[${i}].deleteCode`
+		}
 		descs.push(deletebtn)
 		if(needList.composite.addType === 5) { //添加关系选择
-			const relation = {}
 			const composite = needList.composite
 			const relaOptions = []
 			composite.relationSubdomain.map((item) => {
-				const list = {}
-				list["title"] = item
-				list["value"] = item
-				list["label"] = item
+				const list = {
+					title:item,
+					value:item,
+					label:item
+				}
 				relaOptions.push(list)
 				return false
 			})
-			relation["fieldId"] = composite.id
-			relation["type"] = "relation"
-			relation["title"] = "关系"
-			relation["validators"] = "required"
-			relation["fieldName"] = `${totalNm}.关系`
-			relation["relationSubdomain"] = relaOptions
-			relation["value"] = composite.relationSubdomain.length===1?composite.relationSubdomain[0]:null
+			const relation = {
+				fieldId:composite.id,
+				type:"relation",
+				title:"关系",
+				validators: "required",
+				fieldName:`${totalNm}.关系`,
+				relationSubdomain:relaOptions,
+				value:composite.relationSubdomain.length===1?composite.relationSubdomain[0]:null
+			}
 			descs.push(relation)
 			optionsMap[`field_${composite.id}`] = relaOptions
 		}
-		const onlycode = {}
-		onlycode["type"] = "onlycode"
-		onlycode["fieldName"] = `${totalNm}.code`
-		if(data) {
-			onlycode["value"] = data["唯一编码"]
+		const onlycode = {
+			type:"onlycode",
+			fieldName:`${totalNm}.code`,
+			value:data?data["唯一编码"]:null
 		}
 		descs.push(onlycode)
 
 		descs.push(...needList.descs)
-		const list = {}
-		list["i"] = i
-		list["id"] = needList.id
-		list["title"] = needList.title
-		list["composite"] = needList.composite
-		list["descs"] = needList.descs
-		if(needList.stmplId) {
-			list["stmplId"] = needList.stmplId
+		const list = {
+			i,
+			id:needList.id,
+			title:needList.title,
+			composite: needList.composite,
+			descs:needList.descs,
+			stmplId:needList.stmplId?needList.stmplId:null
 		}
 		const arr = []
 		descs.map((item) => {

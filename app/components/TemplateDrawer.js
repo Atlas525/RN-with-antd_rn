@@ -120,11 +120,12 @@ export default class TemplateDrawer extends Component {
 	}
 	goPage = (no) => {
 		const {pageInfo,menuId,stmplId,excepts,tokenName} = this.state
-		let data = {}
 		const topageNo = pageInfo.pageNo + no
-		data["pageNo"] = topageNo
-		data["pageSize"] = pageInfo.pageSize
-		data["excepts"] = excepts
+		let data = {
+			pageNo:topageNo,
+			pageSize:pageInfo.pageSize,
+			excepts:excepts
+		}
 		Super.super({
 			url: `/api/entity/curd/selections/${menuId}/${stmplId}`,
 			data: data

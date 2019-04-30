@@ -35,9 +35,10 @@ export default class Login extends Component {
     handleSubmit=()=>{
         const {username,password,remember}=this.state
         if(username && password){
-            let user={}
-            user['username']=username
-            user['password']=password
+            let user={
+                username,
+                password
+            }
             Super.super({
                 url: '/api/auth/token',
                 query:user
