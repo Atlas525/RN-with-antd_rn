@@ -18,13 +18,12 @@ export default class CasePicker extends Component {
 		tagStr: []
 	}
 	showModal = (formList) => {
-		let caseList = formList.value
+		const caseList = formList.value
 		const optGroupId = formList.optionKey.split("@")[0]
 		const num = formList.optionKey.split("@")[1]
 		let {tagStr} = this.state
 		if(caseList) {
-			tagStr = caseList.split("->")
-			tagStr = Units.uniq(tagStr)
+			tagStr = Units.uniq(caseList.split("->"))
 		}
 		this.setState({
 			caseModal: true,
@@ -40,7 +39,7 @@ export default class CasePicker extends Component {
 
 	getcaseList = (optionKey) => {
 		const {tokenName} =this.props
-		let {ikey} = this.state
+		const {ikey} = this.state
 		if(typeof optionKey === "string") {
 			ikey.push(parseInt(optionKey))
 			this.setState({
@@ -66,18 +65,18 @@ export default class CasePicker extends Component {
 		})
 	}
 	onChangeTag = (index, radiokey) => {
-		let {stateRadioValue,ikey} = this.state
+		const {stateRadioValue,ikey} = this.state
 		const arr = stateRadioValue.split("->")
 		const arr2 = []
 		const keys = []
-		let res = ""
+		const res = ""
 		if(index > 0) { //点击tag.删除点击tag之后的数据
-			for(let i = 0; i < index; i++) {
+			for(const i = 0; i < index; i++) {
 				arr2.push(arr[i])
 			}
 			res = arr2.join("->")
 		}
-		for(let i = 0; i <= index; i++) {
+		for(const i = 0; i <= index; i++) {
 			keys.push(ikey[i])
 		}
 		this.getcaseList(radiokey)
@@ -112,8 +111,7 @@ export default class CasePicker extends Component {
 			changenum++
 		}
 		if(caseList) {
-			tagStr = caseList.split("->")
-			tagStr = Units.uniq(tagStr)
+			tagStr = Units.uniq(caseList.split("->"))
 		}
 		if(stateRadioValue.split("->").length < Num) {
 			this.getcaseList(radiokey)
@@ -132,9 +130,8 @@ export default class CasePicker extends Component {
 		});
 	};
 	onCloseCase = () => {
-		let {caseList} = this.state
-		let {formList} = this.props
-		formList.value = caseList //最后按确定键，将值传出
+		const {caseList} = this.state
+		this.props.formList.value = caseList //最后按确定键，将值传出
 		this.triggerChange(caseList);
 		this.onClose()
 		this.setState({
@@ -147,7 +144,7 @@ export default class CasePicker extends Component {
 		})
 	}
 	triggerChange = (changedValue) => {
-		const onChange = this.props.onChange;
+		const {onChange} = this.props
 		if(onChange) {
 			onChange(changedValue);
 		}

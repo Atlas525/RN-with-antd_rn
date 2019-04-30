@@ -121,7 +121,7 @@ export default class TemplateDrawer extends Component {
 	goPage = (no) => {
 		const {pageInfo,menuId,stmplId,excepts,tokenName} = this.state
 		const topageNo = pageInfo.pageNo + no
-		let data = {
+		const data = {
 			pageNo:topageNo,
 			pageSize:pageInfo.pageSize,
 			excepts:excepts
@@ -142,7 +142,7 @@ export default class TemplateDrawer extends Component {
 		const {showDrawer,pageInfo,templateData} = this.state
 		const drawerData = templateData.entities
 		const totalPage = pageInfo ? Math.ceil(pageInfo.count / pageInfo.pageSize) : null
-		let sidebar = (<ScrollView ref={(view) => { this.templateDrawer = view; }}>							
+		const sidebar = (<ScrollView ref={(view) => { this.templateDrawer = view; }}>							
 							<View style={styles.btns}>
 								<Text onLayout={e=>this.templateY = e.nativeEvent.layout.y}>
 									{pageInfo?`第${pageInfo.pageNo}页，共${pageInfo.count}条`:null}

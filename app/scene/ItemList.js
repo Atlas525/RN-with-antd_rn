@@ -54,7 +54,7 @@ class ListContent extends Component {
     goPage = (no) => {
         const {pageInfo,searchwords} = this.state
 		const topageNo = pageInfo.pageNo + no
-		let data = {
+		const data = {
             pageNo:topageNo,
             pageSize:pageInfo.pageSize
         }

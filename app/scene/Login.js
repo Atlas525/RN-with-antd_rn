@@ -35,7 +35,7 @@ export default class Login extends Component {
     handleSubmit=()=>{
         const {username,password,remember}=this.state
         if(username && password){
-            let user={
+            const user={
                 username,
                 password
             }

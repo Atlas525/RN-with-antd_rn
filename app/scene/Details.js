@@ -80,7 +80,7 @@ class Details extends Component {
 		},tokenName).then((res) => {
 			if(res && res.entity) {
 				const scrollIds = []
-				let itemList = res.entity.fieldGroups
+				const itemList = res.entity.fieldGroups
 				itemList.map((item) => {
 					scrollIds.push(item.title)
 					return false
@@ -121,7 +121,7 @@ class Details extends Component {
 			const result = []
 			let re = []
 			premises.map((item) => {				
-				let li = {
+				const li = {
 					title: item.fieldTitle,
 					type:"text",
 					value:item.fieldValue,
@@ -130,7 +130,7 @@ class Details extends Component {
 				}
 				const fields = []
 				fields.push(li)
-				let list = {
+				const list = {
 					id:item.id,
 					title:"不可修改字段",
 					fields:fields
