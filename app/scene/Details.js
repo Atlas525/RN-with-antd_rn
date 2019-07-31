@@ -133,7 +133,7 @@ class Details extends Component {
 				const list = {
 					id:item.id,
 					title:"不可修改字段",
-					fields:fields
+					fields
 				}
 				result.push(list)
 				re = fields
